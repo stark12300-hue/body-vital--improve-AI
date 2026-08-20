@@ -1305,6 +1305,43 @@ function generateSmartFallbackPlan(profile: any) {
   };
 }
 
+// Helper to format chat history for Gemini API
+function formatGeminiChatContents(messages: any[], defaultPrompt?: string): any[] {
+  const valid = (messages || []).filter(
+    (m: any) => m && typeof m.text === "string" && m.text.trim().length > 0
+  );
+
+  if (valid.length === 0) {
+    return [{ role: "user", parts: [{ text: defaultPrompt || "Hello Coach, give me fitness and diet guidance." }] }];
+  }
+
+  const rawTurns: { role: "user" | "model"; text: string }[] = [];
+
+  for (const m of valid) {
+    const role = m.sender === "user" ? "user" : "model";
+    if (rawTurns.length > 0 && rawTurns[rawTurns.length - 1].role === role) {
+      rawTurns[rawTurns.length - 1].text += "\n" + m.text.trim();
+    } else {
+      rawTurns.push({ role, text: m.text.trim() });
+    }
+  }
+
+  // Gemini API requires the conversation to start with 'user' role
+  while (rawTurns.length > 0 && rawTurns[0].role === "model") {
+    rawTurns.shift();
+  }
+
+  if (rawTurns.length === 0) {
+    const lastUser = valid.slice().reverse().find((m: any) => m.sender === "user")?.text;
+    rawTurns.push({ role: "user", text: lastUser || defaultPrompt || "Hello Coach!" });
+  }
+
+  return rawTurns.map((turn) => ({
+    role: turn.role,
+    parts: [{ text: turn.text }],
+  }));
+}
+
 // Fallback Chat Reply Generator
 function generateSmartFallbackChatReply(messages: any[], userProfile: any, currentDietPlan: any, currentWorkoutPlan: any) {
   const lastMsg = messages[messages.length - 1]?.text?.toLowerCase() || "";
@@ -1313,51 +1350,110 @@ function generateSmartFallbackChatReply(messages: any[], userProfile: any, curre
   const cal = currentDietPlan?.macroTargets?.calories || 2000;
   const prot = currentDietPlan?.macroTargets?.proteinGrams || 130;
 
-  if (lastMsg.includes("knee") || lastMsg.includes("ghutna") || lastMsg.includes("dard") || lastMsg.includes("pain") || lastMsg.includes("squat")) {
-    return `Namaste ${name}! Ghutne (Knee) ke dard ke liye yeh safety protocols follow karein:
+  // 1. Knee / Joint Pain / Injury queries
+  if (lastMsg.includes("knee") || lastMsg.includes("ghutna") || lastMsg.includes("dard") || lastMsg.includes("pain") || lastMsg.includes("chot") || lastMsg.includes("injury")) {
+    return `Namaste ${name}! Joint aur injury protection ke liye yeh golden guidelines follow karein:
 
-1. **Exercise Replacement**: Deep barbell squats ki jagah **Goblet Box Squat** ya **Leg Press (high foot placement)** karein. Isse knee joint par compressive load 60% kam ho jata hai.
-2. **Hamstring & Glute Focus**: **Romanian Deadlifts (RDL)** aur **Glute Bridges** par zyada dhyan dein — yeh knee joint ke stabilizers ko strong banate hain.
-3. **Warm-up**: Workout se pehle 5 min stationary cycle aur glute activation zaroor karein.
-4. **Anti-inflammatory Diet**: Haldi (turmeric) milk aur Omega-3 rich seeds (flaxseeds/chia seeds) daily lein.
+1. 🦵 **Knee Safety**: Deep heavy barbell squats ki jagah **Goblet Box Squat** ya **Leg Press (high foot placement)** karein. Isse knee joint par compressive stress 60% kam ho jata hai.
+2. 🛡️ **Posterior Chain Strengthening**: **Romanian Deadlifts (RDL)** aur **Glute Bridges** par dhyan dein — yeh joint ke stabilizing ligaments ko protect karte hain.
+3. 🔥 **Warm-up**: Workout se pehle 5 min mobility drills aur bodyweight glute activation zaroor karein.
+4. 🍵 **Recovery**: Haldi (turmeric) milk aur Omega-3 rich seeds (chia/flaxseeds) daily lein.
 
-Agar dard sharp ya persistent ho, toh weight kam karein aur rest dein!`;
+Agar dard sharp ya persistent ho, toh weight kam karein aur rest zaroor lein!`;
   }
 
-  if (lastMsg.includes("protein") || lastMsg.includes("paneer") || lastMsg.includes("egg") || lastMsg.includes("diet") || lastMsg.includes("snack")) {
+  // 2. Belly Fat / Weight Loss / Fat Loss queries
+  if (lastMsg.includes("belly") || lastMsg.includes("pet") || lastMsg.includes("tummy") || lastMsg.includes("charbi") || lastMsg.includes("fat") || lastMsg.includes("vajan kam") || lastMsg.includes("weight loss") || lastMsg.includes("motapa")) {
+    return `Namaste ${name}! Pet ki charbi (Belly Fat) kam karne ka scientific formula:
+
+1. 🔥 **Spot Reduction Ek Myth Hai**: Sirf crunches karne se pet ki charbi kam nahi hoti. Fat loss overall body se hota hai jab aap **Calorie Deficit** me rehte hain.
+2. 🎯 **Aapka Calorie Target**: Daily **${cal} kcal** target maintain karein aur junk foods/sugary drinks se bachein.
+3. 🥩 **High Protein Advantage**: Daily **${prot}g Protein** lene se metabolism boost hota hai aur craving khatam hoti hai.
+4. 🚶‍♂️ **NEAT Activity**: Roz **8,000 - 10,000 steps** chalna shuru karein — yeh silent fat burner hai!
+5. 😴 **Sleep & Cortisol**: 7-8 ghante ki achhi neend lein, kyunki stress hormone (Cortisol) belly fat store karta hai.
+
+Consistency rakhein, 3-4 hafte me visible difference dikhega!`;
+  }
+
+  // 3. Muscle Building / Hypertrophy / Chest / Biceps / Six Pack queries
+  if (lastMsg.includes("muscle") || lastMsg.includes("biceps") || lastMsg.includes("chest") || lastMsg.includes("triceps") || lastMsg.includes("pack") || lastMsg.includes("bulk") || lastMsg.includes("hypertrophy") || lastMsg.includes("size")) {
+    return `Namaste ${name}! Fast muscle growth aur size badhane ke 4 pillars:
+
+1. 📈 **Progressive Overload**: Har 1-2 hafte me weights ya reps thode badhayein. Last 2-3 reps me challenging feel hona chahiye (RPE 8-9).
+2. ⏱️ **Eccentric Control (Time Under Tension)**: Weight ko niche laate waqt 2-3 second slow control karein — 70% muscle damage aur growth yahan se aati hai.
+3. 🍗 **Protein Timing**: Roz **${prot}g Protein** ko 3-4 meals me divide karein (har meal me ~30g) taaki Muscle Protein Synthesis (MPS) din bhar on rahe.
+4. 🛌 **Recovery & Sleep**: Muscle gym me nahi, sote waqt banti hai! Deep sleep me Growth Hormone release hota hai.
+
+Aapka current workout plan isi principle par design kiya gaya hai!`;
+  }
+
+  // 4. Creatine & Supplements queries
+  if (lastMsg.includes("creatine") || lastMsg.includes("whey") || lastMsg.includes("supplement") || lastMsg.includes("powder") || lastMsg.includes("side effect")) {
+    return `Great question ${name}! Supplements ke bare me scientific truth:
+
+🧪 **Creatine Monohydrate**:
+- **Dose**: 3g to 5g roz (kisi bhi time, post-workout with water or juice).
+- **Benefit**: Muscle cells me ATP energy badhata hai, strength 10-15% increase hoti hai.
+- **Fact**: Yeh 100% safe aur deeply researched supplement hai. Saath me **3.5 - 4 Liters paani** zaroor piyein.
+
+🥛 **Whey / Plant Protein**:
+- Yeh koi steroid ya synthetic chemical nahi hai — yeh doodh ya plant source se nikla concentrated protein hai.
+- Agar aap normal khane se apna **${prot}g** target poora nahi kar pa rahe, tabhi 1 scoop zaroor add karein.`;
+  }
+
+  // 5. Diet, Vegetarian Protein & Snack queries
+  if (lastMsg.includes("protein") || lastMsg.includes("paneer") || lastMsg.includes("egg") || lastMsg.includes("diet") || lastMsg.includes("snack") || lastMsg.includes("soya") || lastMsg.includes("tofu") || lastMsg.includes("veg") || lastMsg.includes("recipe")) {
     return `Namaste ${name}! Aapka daily protein target **${prot}g** hai. Yahan best options hain:
 
-• **Vegetarian High Protein**:
-  - Soya Chunks (50g dry = 26g Protein) — budget friendly!
-  - Low-fat Paneer (100g = 18-20g Protein)
-  - Moong Dal / Besan Chilla (2 chilla = 14g Protein)
-  - Curd / Greek Yogurt (150g = 8-12g Protein)
-• **Quick Evening Snacks under ₹40**:
-  - 40g Bhuna Chana + 1 Glass Masala Chaas (~15g protein)
-  - 2 Boiled Eggs + Black Coffee (~12g protein)
+🥗 **Vegetarian High-Protein Sources**:
+• **Soya Chunks** (50g dry = 26g Protein) — sabse budget-friendly!
+• **Low-Fat Paneer** (100g = 18-20g Protein)
+• **Tofu / Soy Paneer** (100g = 15g Protein, low calorie)
+• **Moong Dal / Besan Chilla** (2 chilla = 14g Protein)
+• **Greek Yogurt / Hung Curd** (150g = 10-12g Protein)
 
-Har meal me minimum 25-35g protein distribute karein taaki muscle synthesis active rahe!`;
+⚡ **Quick Evening Snacks under ₹40**:
+• 40g Bhuna Chana + 1 Glass Masala Chaas (~15g protein)
+• 2 Boiled Eggs + Black Coffee (~12g protein)
+
+Har meal me minimum 25-35g protein distribute karein!`;
   }
 
-  if (lastMsg.includes("pre") || lastMsg.includes("post") || lastMsg.includes("workout") || lastMsg.includes("khana")) {
-    return `Great question ${name}! Pre aur Post workout nutrition ka golden rule:
+  // 6. Pre & Post Workout / Timing queries
+  if (lastMsg.includes("pre") || lastMsg.includes("post") || lastMsg.includes("workout") || lastMsg.includes("khana") || lastMsg.includes("timing") || lastMsg.includes("time") || lastMsg.includes("subah") || lastMsg.includes("morning") || lastMsg.includes("evening")) {
+    return `Great question ${name}! Pre aur Post workout nutrition ka golden protocol:
 
 ⚡ **Pre-Workout (45-60 min pehle)**:
-- 1 Banana / 1 Apple + 1 cup Black Coffee (caffeine focus badhayega)
+- 1 Banana / Apple + 1 cup Black Coffee (caffeine se focus aur strength badhegi)
 - Ya 2 Brown Bread with 1 tsp Peanut Butter
-- Yeh aapko heavy lift karne ke liye sustained glycogen energy dega.
+- Yeh heavy lift karne ke liye sustained glycogen energy dega.
 
-💪 **Post-Workout (Workout ke 30-45 min andar)**:
-- 1 scoop Whey/Plant protein water me ya 3 Boiled Eggs / 80g Paneer
-- Saath me simple carbs (e.g. 1 small banana ya 1 slice bread) muscle glycogen restore karne ke liye!`;
+💪 **Post-Workout (Workout ke 30-45 min ke andar)**:
+- 1 scoop Whey/Plant protein ya 3 Boiled Eggs / 80g Low-fat Paneer
+- Saath me simple carbs (e.g. 1 small banana ya 1 slice bread) muscle glycogen fast restore karne ke liye!
+
+⏰ **Best Workout Time**: Subah ya shaam dono achha hai — wahi time chunein jisme aap consistent reh sakein.`;
   }
 
-  return `Namaste ${name}! Main aapke **${goal}** transformation journey ke har step me aapke saath hu.
+  // 7. Soreness / DOMS / Thakan / Rest queries
+  if (lastMsg.includes("thak") || lastMsg.includes("sore") || lastMsg.includes("tired") || lastMsg.includes("energy") || lastMsg.includes("recovery") || lastMsg.includes("neend") || lastMsg.includes("sleep")) {
+    return `Namaste ${name}! Muscle soreness (DOMS) aur low energy ko fast fix karne ke tips:
 
-• **Current Calories**: ${cal} kcal/day (Protein: ${prot}g)
-• **Key Advice**: Workout me progressive overload follow karein, rest timer (60-90s) ka strict palan karein, aur daily 3.5L paani zaroor piyein.
+1. 💧 **Hydration & Electrolytes**: Din me 3.5L paani piyein. Thoda nimbu paani aur black salt energy restore karega.
+2. 🧘 **Active Recovery**: Rest day par halka stretch ya 15-20 min walk karein taaki blood circulation se lactic acid clear ho sake.
+3. 🍌 **Potassium & Magnesium**: Kela, bhuna chana, ya badam khane se muscle cramps nahi aate.
+4. 😴 **8 Hours Deep Sleep**: Sleep ke dauran hi central nervous system recover hota hai.
 
-Koi specific exercise form, diet recipe ya substitute puchna ho toh batayein! 💪`;
+Aapka shareer adapt ho raha hai, 1 hafte me stamina double ho jayega!`;
+  }
+
+  // 8. General / Fallback supportive reply
+  return `Namaste ${name}! Main aapke **${goal}** transformation journey ke har step me aapka personal AI coach hu.
+
+• **Aapka Daily Calorie Target**: ${cal} kcal (Protein: ${prot}g)
+• **Key Advice**: Workout me progressive overload follow karein, exercises ke beech 60-90s rest lein, aur rojana 3.5L paani zaroor piyein.
+
+Aap mujhse workout form, diet recipe swap, supplements, ya kisi bhi problem ke baare me pooch sakte hain! Main turant madad karunga. 💪`;
 }
 
 // Fallback Weekly Review Generator
@@ -1711,25 +1807,25 @@ KEY CAPABILITIES:
 4. Motivation & Consistency: Energetic, science-backed and supportive.
 `;
 
-    const contents = messages.map((m: any) => ({
-      role: m.sender === "user" ? "user" : "model",
-      parts: [{ text: m.text }],
-    }));
+    const contents = formatGeminiChatContents(
+      messages,
+      "Namaste Coach, please answer my question and guide me on my workout and nutrition."
+    );
 
     try {
       const text = await callGeminiWithRetryAndFallback({
         contents: contents,
         config: {
           systemInstruction: systemInstruction,
-          temperature: 0.6,
+          temperature: 0.7,
         },
       });
 
       if (text && text.trim().length > 0) {
         return res.json({ reply: text });
       }
-    } catch (aiErr) {
-      console.warn("AI chat API notice, applying smart coach fallback reply:", aiErr);
+    } catch (aiErr: any) {
+      console.log("AI chat API notice, applying smart coach fallback reply:", aiErr?.message || "fallback engaged");
     }
 
     const fallbackReply = generateSmartFallbackChatReply(messages, userProfile, currentDietPlan, currentWorkoutPlan);
