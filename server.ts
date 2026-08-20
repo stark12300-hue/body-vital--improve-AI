@@ -487,9 +487,10 @@ function cleanAndParseJson(text: string): any {
 
 // Resilient Gemini invocation with multi-model fallback and graceful degraded handling
 const CANDIDATE_MODELS = [
+  "gemini-3.6-flash",
+  "gemini-3.7-flash",
   "gemini-3.1-flash-lite",
   "gemini-flash-latest",
-  "gemini-3.7-flash",
 ];
 
 async function callGeminiWithRetryAndFallback(params: {
@@ -513,16 +514,9 @@ async function callGeminiWithRetryAndFallback(params: {
       }
     } catch (err: any) {
       lastError = err;
-      const isHighDemand =
-        err?.status === 503 ||
-        err?.status === 429 ||
-        err?.status === "UNAVAILABLE" ||
-        (err?.message && (err.message.includes("503") || err.message.includes("high demand") || err.message.includes("UNAVAILABLE")));
-
-      if (isHighDemand) {
-        // High demand on this model cluster - seamlessly route to next model
-        continue;
-      }
+      console.warn(`Candidate model ${model} temporarily unavailable:`, err?.status || err?.message || err);
+      // Seamlessly advance to the next candidate model
+      continue;
     }
   }
 
@@ -1363,7 +1357,7 @@ Agar dard sharp ya persistent ho, toh weight kam karein aur rest zaroor lein!`;
   }
 
   // 2. Belly Fat / Weight Loss / Fat Loss queries
-  if (lastMsg.includes("belly") || lastMsg.includes("pet") || lastMsg.includes("tummy") || lastMsg.includes("charbi") || lastMsg.includes("fat") || lastMsg.includes("vajan kam") || lastMsg.includes("weight loss") || lastMsg.includes("motapa")) {
+  if (lastMsg.includes("belly") || lastMsg.includes("pet") || lastMsg.includes("tummy") || lastMsg.includes("charbi") || lastMsg.includes("fat") || lastMsg.includes("vajan kam") || lastMsg.includes("weight loss") || lastMsg.includes("motapa") || lastMsg.includes("burn")) {
     return `Namaste ${name}! Pet ki charbi (Belly Fat) kam karne ka scientific formula:
 
 1. 🔥 **Spot Reduction Ek Myth Hai**: Sirf crunches karne se pet ki charbi kam nahi hoti. Fat loss overall body se hota hai jab aap **Calorie Deficit** me rehte hain.
@@ -1375,19 +1369,42 @@ Agar dard sharp ya persistent ho, toh weight kam karein aur rest zaroor lein!`;
 Consistency rakhein, 3-4 hafte me visible difference dikhega!`;
   }
 
-  // 3. Muscle Building / Hypertrophy / Chest / Biceps / Six Pack queries
-  if (lastMsg.includes("muscle") || lastMsg.includes("biceps") || lastMsg.includes("chest") || lastMsg.includes("triceps") || lastMsg.includes("pack") || lastMsg.includes("bulk") || lastMsg.includes("hypertrophy") || lastMsg.includes("size")) {
-    return `Namaste ${name}! Fast muscle growth aur size badhane ke 4 pillars:
+  // 3. Weight Gain / Bulking / Hardgainer queries
+  if (lastMsg.includes("vajan badhana") || lastMsg.includes("weight gain") || lastMsg.includes("bulk") || lastMsg.includes("mota hona") || lastMsg.includes("skinny") || lastMsg.includes("hardgainer")) {
+    return `Namaste ${name}! Healthy weight & muscle gain karne ka foolproof formula:
 
-1. 📈 **Progressive Overload**: Har 1-2 hafte me weights ya reps thode badhayein. Last 2-3 reps me challenging feel hona chahiye (RPE 8-9).
-2. ⏱️ **Eccentric Control (Time Under Tension)**: Weight ko niche laate waqt 2-3 second slow control karein — 70% muscle damage aur growth yahan se aati hai.
-3. 🍗 **Protein Timing**: Roz **${prot}g Protein** ko 3-4 meals me divide karein (har meal me ~30g) taaki Muscle Protein Synthesis (MPS) din bhar on rahe.
-4. 🛌 **Recovery & Sleep**: Muscle gym me nahi, sote waqt banti hai! Deep sleep me Growth Hormone release hota hai.
-
-Aapka current workout plan isi principle par design kiya gaya hai!`;
+1. 🥑 **Calorie Surplus (+300 to 500 kcal)**: Din me **${cal + 400} kcal** consume karein calorie-dense foods ke zariye (Peanut butter, Banana shakes, Oats, Dry fruits, Ghee).
+2. 🥩 **Protein Intake**: Roz **${prot}g Protein** zaroor lein taaki muscle mass gain ho, charbi nahi.
+3. 🏋️ **Heavy Compound Lifts**: Bench Press, Squats, Barbell Rows aur Shoulder Press par weight progress karein.
+4. 🥤 **Homemade Mass Gainer Shake Recipe**:
+   - 400ml Doodh + 2 Kela + 2 tbsp Peanut Butter + 50g Oats + 5 Badaam (Takes only 2 mins, gives ~650 kcal & 25g+ Protein).`;
   }
 
-  // 4. Creatine & Supplements queries
+  // 4. Chest / Biceps / Upper body Hypertrophy queries
+  if (lastMsg.includes("chest") || lastMsg.includes("pecs") || lastMsg.includes("biceps") || lastMsg.includes("triceps") || lastMsg.includes("arms") || lastMsg.includes("dole") || lastMsg.includes("shoulder") || lastMsg.includes("back") || lastMsg.includes("wings")) {
+    return `Namaste ${name}! Upper body & muscle growth ke 4 scientific rules:
+
+1. 📈 **Progressive Overload**: Har week weights ya reps me +1-2 ka increment karein (RPE 8-9 zone).
+2. ⏱️ **Time Under Tension (TUT)**: Weight niche laate waqt 2-3 seconds slow control karein — yahi se muscle fibers me hypertrophy trigger hoti hai.
+3. 🎯 **Chest & Arms Routine**:
+   - Incline Dumbbell Press (Upper Chest) — 3 sets x 8-10 reps
+   - Flat Barbell Bench Press — 3 sets x 8 reps
+   - Cable Flyes / Pec Deck — 3 sets x 12 reps (peak squeeze for 1 sec)
+   - Incline Dumbbell Bicep Curls + Overhead Tricep Extension — 3 sets x 12 reps
+4. 🍗 **Post-Workout Recovery**: Session ke 45 min ke andar 25-30g protein aur fast carbs zaroor lein!`;
+  }
+
+  // 5. Abs / Six Pack / Core queries
+  if (lastMsg.includes("abs") || lastMsg.includes("six pack") || lastMsg.includes("core") || lastMsg.includes("crunches") || lastMsg.includes("plank")) {
+    return `Namaste ${name}! 6-Pack Abs ke liye yeh yaad rakhein:
+
+1. 🍽️ **Abs Kitchen me bante hain**: Visible abs tab aate hain jab body fat percentage 12-14% (men) ya 18-20% (women) ke niche aaye via **Calorie Deficit**.
+2. 🧱 **Core Muscle Hypertrophy**: Normal floor crunches ki jagah **Weighted Hanging Leg Raises** aur **Cable Rope Woodchops** karein.
+3. 🛡️ **Planks**: 60 seconds ke 3 sets core endurance ke liye best hain.
+4. 🚶‍♂️ **Cardio**: Roz 8k-10k steps abs ko reveal karne me sabse bada role play karte hain!`;
+  }
+
+  // 6. Creatine & Supplements queries
   if (lastMsg.includes("creatine") || lastMsg.includes("whey") || lastMsg.includes("supplement") || lastMsg.includes("powder") || lastMsg.includes("side effect")) {
     return `Great question ${name}! Supplements ke bare me scientific truth:
 
@@ -1401,7 +1418,7 @@ Aapka current workout plan isi principle par design kiya gaya hai!`;
 - Agar aap normal khane se apna **${prot}g** target poora nahi kar pa rahe, tabhi 1 scoop zaroor add karein.`;
   }
 
-  // 5. Diet, Vegetarian Protein & Snack queries
+  // 7. Diet, Vegetarian Protein & Snack queries
   if (lastMsg.includes("protein") || lastMsg.includes("paneer") || lastMsg.includes("egg") || lastMsg.includes("diet") || lastMsg.includes("snack") || lastMsg.includes("soya") || lastMsg.includes("tofu") || lastMsg.includes("veg") || lastMsg.includes("recipe")) {
     return `Namaste ${name}! Aapka daily protein target **${prot}g** hai. Yahan best options hain:
 
@@ -1419,7 +1436,7 @@ Aapka current workout plan isi principle par design kiya gaya hai!`;
 Har meal me minimum 25-35g protein distribute karein!`;
   }
 
-  // 6. Pre & Post Workout / Timing queries
+  // 8. Pre & Post Workout / Timing queries
   if (lastMsg.includes("pre") || lastMsg.includes("post") || lastMsg.includes("workout") || lastMsg.includes("khana") || lastMsg.includes("timing") || lastMsg.includes("time") || lastMsg.includes("subah") || lastMsg.includes("morning") || lastMsg.includes("evening")) {
     return `Great question ${name}! Pre aur Post workout nutrition ka golden protocol:
 
@@ -1435,8 +1452,35 @@ Har meal me minimum 25-35g protein distribute karein!`;
 ⏰ **Best Workout Time**: Subah ya shaam dono achha hai — wahi time chunein jisme aap consistent reh sakein.`;
   }
 
-  // 7. Soreness / DOMS / Thakan / Rest queries
-  if (lastMsg.includes("thak") || lastMsg.includes("sore") || lastMsg.includes("tired") || lastMsg.includes("energy") || lastMsg.includes("recovery") || lastMsg.includes("neend") || lastMsg.includes("sleep")) {
+  // 9. Running / Cardio / Steps queries
+  if (lastMsg.includes("cardio") || lastMsg.includes("running") || lastMsg.includes("walk") || lastMsg.includes("steps") || lastMsg.includes("treadmill") || lastMsg.includes("cycle")) {
+    return `Namaste ${name}! Cardio aur fat loss ka optimum routine:
+
+1. 🚶‍♂️ **Incline Treadmill Walk (LISS)**: 12 incline, 4.5 km/h speed par 20 min chalna muscle bachakar sirf fat burn karta hai (Zone 2 cardio).
+2. ⏱️ **Cardio Timing**: Weight training ke **baad** me 15-20 min cardio karein, taaki lift ke liye puri glycogen energy available rahe.
+3. 👟 **Daily Step Goal**: Roz 8,000-10,000 steps record karein — isse din bhar me 300+ extra calories burn hoti hain.`;
+  }
+
+  // 10. Water / Hydration / Cramps queries
+  if (lastMsg.includes("water") || lastMsg.includes("paani") || lastMsg.includes("hydration") || lastMsg.includes("cramp") || lastMsg.includes("dehydration")) {
+    return `Namaste ${name}! Proper hydration protocol:
+
+💧 **Daily Target**: **3.5 se 4 Liters paani** roz piyein.
+🧂 **Electrolytes**: Heavy sweating wale days par subah 1 glass paani me 1 chutki sendha namak (pink salt) aur adha nimbu daal kar piyein. Isse cramps nahi aate aur muscle pumps better aate hain!`;
+  }
+
+  // 11. Cheat Meal / Fasting / Junk Food queries
+  if (lastMsg.includes("cheat") || lastMsg.includes("junk") || lastMsg.includes("pizza") || lastMsg.includes("burger") || lastMsg.includes("fasting") || lastMsg.includes("vrat")) {
+    return `Namaste ${name}! Cheat meal aur craving management ka 80/20 rule:
+
+🍕 **Cheat Meal Rule**:
+- Hafte me 1 cheat *meal* lein (poora cheat *day* nahi).
+- Cheat meal se pehle 1 bada bowl salad aur 1 scoop protein piyein taaki overeating na ho.
+- Cheat meal ke agle din crash dieting na karein, bas apna regular **${cal} kcal** plan resume karein!`;
+  }
+
+  // 12. Soreness / DOMS / Thakan / Rest queries
+  if (lastMsg.includes("thak") || lastMsg.includes("sore") || lastMsg.includes("tired") || lastMsg.includes("energy") || lastMsg.includes("recovery") || lastMsg.includes("neend") || lastMsg.includes("sleep") || lastMsg.includes("aalsi")) {
     return `Namaste ${name}! Muscle soreness (DOMS) aur low energy ko fast fix karne ke tips:
 
 1. 💧 **Hydration & Electrolytes**: Din me 3.5L paani piyein. Thoda nimbu paani aur black salt energy restore karega.
@@ -1447,13 +1491,13 @@ Har meal me minimum 25-35g protein distribute karein!`;
 Aapka shareer adapt ho raha hai, 1 hafte me stamina double ho jayega!`;
   }
 
-  // 8. General / Fallback supportive reply
-  return `Namaste ${name}! Main aapke **${goal}** transformation journey ke har step me aapka personal AI coach hu.
+  // 13. General contextual fallback
+  return `Namaste ${name}! Aapka sawal note kar liya gaya hai. Aapke **${goal}** transformation journey ke mutabik:
 
 • **Aapka Daily Calorie Target**: ${cal} kcal (Protein: ${prot}g)
-• **Key Advice**: Workout me progressive overload follow karein, exercises ke beech 60-90s rest lein, aur rojana 3.5L paani zaroor piyein.
+• **Key Training Rule**: Workout me 60-90s rest maintain karein aur form strict rakhein.
 
-Aap mujhse workout form, diet recipe swap, supplements, ya kisi bhi problem ke baare me pooch sakte hain! Main turant madad karunga. 💪`;
+Aap mujhse workout exercises, diet recipes, supplements ya injury ke bare me detail me pooch sakte hain!`;
 }
 
 // Fallback Weekly Review Generator
