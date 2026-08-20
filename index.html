@@ -1,41 +1,18 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>FitForge AI - Bodybuilding, Workout & Diet Coach</title>
-    <meta name="description" content="AI Bodybuilding coach with customized workout plans, health-aware diet charts, daily exercise logger, and weekly progress updates." />
-    
-    <!-- PWA & Mobile Web App Meta -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#020617" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="FitForge AI" />
-    <link rel="apple-touch-icon" href="/icon-192.svg" />
-    <link rel="icon" type="image/svg+xml" href="/icon-192.svg" />
-    
-    <meta property="og:title" content="FitForge AI - Workout, Diet & Health Coach" />
-    <meta property="og:description" content="Customized bodybuilding splits, health precautions, diet charts, and weekly AI recalibration." />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FitGuru AI - Smart Body Transformation Coach</title>
+    <meta name="description" content="Personalized AI Fitness and Nutrition Coach with daily workout routines, diet plans, health issue tracking, and progress reviews." />
+    <meta property="og:title" content="FitGuru AI - Smart Body Transformation Coach" />
+    <meta property="og:description" content="Personalized AI Fitness and Nutrition Coach with daily workout routines, diet plans, health issue tracking, and progress reviews." />
     <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body class="bg-slate-950 text-slate-100 antialiased selection:bg-indigo-600 selection:text-white">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
-    <script>
-      // Clean up any stale service workers or broken caches
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then((registrations) => {
-          for (const registration of registrations) {
-            // If in dev environment, unregister to avoid Vite module interception
-            if (location.hostname === 'localhost' || location.hostname.includes('.run.app')) {
-              registration.unregister();
-            }
-          }
-        }).catch(() => {});
-      }
-    </script>
   </body>
 </html>
 

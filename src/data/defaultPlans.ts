@@ -1,552 +1,745 @@
-import { FullPlan, UserProfile } from "../types";
+import { UserProfile, WorkoutPlan, DietPlan, ProgressLog } from '../types';
 
-export const DEFAULT_PROFILE: UserProfile = {
-  name: "Aman",
-  age: 24,
-  gender: "male",
-  height: 175,
-  weight: 70,
-  targetWeight: 75,
-  goal: "muscle_building",
-  experienceLevel: "intermediate",
-  workoutLocation: "gym",
-  equipment: "Dumbbells, Barbells, Cables, Machines",
+export const SAMPLE_PROFILE: UserProfile = {
+  id: 'user-demo-1',
+  name: 'Aman Sharma',
+  age: 26,
+  gender: 'male',
+  heightCm: 175,
+  currentWeightKg: 78,
+  targetWeightKg: 72,
+  goal: 'fat_loss',
+  experienceLevel: 'intermediate',
+  workoutLocation: 'gym',
   daysPerWeek: 5,
-  workoutDuration: 60,
-  dietPreference: "veg",
-  cuisinePreference: "Indian (Dal, Roti, Rice, Paneer, Soya, Oats)",
-  budgetPreference: "budget_friendly",
-  healthIssues: ["Lower Back Soreness"],
-  healthNotes: "Occasional lower back stiffness after heavy deadlifts, prefer joint-safe back exercises.",
+  activityLevel: 'moderately_active',
+  healthConditions: {
+    injuries: ['knee_pain'],
+    injuryDetails: 'Mild patellar tendonitis in right knee when squatting below parallel.',
+    chronicConditions: [],
+    chronicDetails: '',
+    allergies: ['none'],
+    allergyDetails: '',
+  },
+  dietType: 'vegetarian',
+  cuisinePreference: 'indian_north',
+  dailyBudget: 'moderate',
+  mealsPerDay: 4,
+  language: 'hinglish',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
-export const SAMPLE_FULL_PLAN: FullPlan = {
-  id: "initial-plan-1",
-  createdAt: new Date().toISOString(),
-  version: 1,
-  summary: {
-    caloriesTarget: 2650,
-    proteinGrams: 140,
-    carbsGrams: 330,
-    fatsGrams: 65,
-    waterLiters: 3.8,
-    bmr: 1680,
-    tdee: 2350,
-    coachInsight: "70kg se 75kg lean muscle mass gain karne ke liye daily ~300 kcal clean surplus aur 140g protein (2g/kg) plan kiya gaya hai. Lower back safety ke liye heavy spinal loading ke bajaye chest-supported rows aur safe compounds rakhe gaye hain.",
-    healthPrecautions: [
-      "Heavy direct floor deadlifts ki jagah Chest-Supported Dumbbell Rows aur Lat Pulldowns karein.",
-      "Squats ke waqt core tight rakhein aur belt ka prayog karein.",
-      "Daily 3.8L paani digestion aur creatine uptake ke liye zaroori hai."
-    ]
-  },
-  workoutPlan: {
-    splitName: "5-Day Push / Pull / Legs / Upper / Lower Split (Back Safe)",
-    overview: "Hypertrophy focused split designed to trigger optimal muscle protein synthesis while keeping lower back completely protected.",
-    days: [
-      {
-        dayNumber: 1,
-        dayName: "Monday",
-        focus: "Push (Chest, Shoulders & Triceps)",
-        isRestDay: false,
-        warmup: ["5 mins Arm Circles & Band Dislocates", "2 sets Pushups (10 reps)", "Rotator Cuff Warmup with light dumbbell"],
-        cooldown: ["Chest Doorway Stretch (60s)", "Overhead Tricep Stretch (45s per arm)"],
-        exercises: [
-          {
-            id: "ex-1",
-            name: "Incline Dumbbell Bench Press",
-            targetMuscle: "Upper Chest & Anterior Deltoid",
-            sets: 4,
-            reps: "8-12 reps",
-            restSeconds: 90,
-            formTips: "Bench at 30-degree angle. Retract shoulder blades, control the negative for 2 seconds and squeeze at the top.",
-            safetyNote: "Avoid flaring elbows to 90 degrees; keep them at a 45-degree angle to save shoulders."
-          },
-          {
-            id: "ex-2",
-            name: "Flat Dumbbell Press / Machine Chest Press",
-            targetMuscle: "Mid & Lower Chest",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 75,
-            formTips: "Full range of motion, deep stretch at bottom, explosive push without locking elbows harshly."
-          },
-          {
-            id: "ex-3",
-            name: "Seated Dumbbell Overhead Shoulder Press",
-            targetMuscle: "Front & Side Deltoids",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 90,
-            formTips: "Sit upright with back support to keep lumbar spine stable.",
-            safetyNote: "Back support on bench removes lumbar shear stress."
-          },
-          {
-            id: "ex-4",
-            name: "Standing Dumbbell Lateral Raises",
-            targetMuscle: "Lateral Deltoid (Boulder Shoulders)",
-            sets: 4,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "Slight forward lean. Lead with elbows, raise until parallel to floor, no swinging."
-          },
-          {
-            id: "ex-5",
-            name: "Rope Cable Tricep Pushdown",
-            targetMuscle: "Triceps (Lateral & Medial Head)",
-            sets: 3,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "Keep elbows pinned to your ribs, spread the rope apart at the bottom for peak contraction."
-          }
-        ]
-      },
-      {
-        dayNumber: 2,
-        dayName: "Tuesday",
-        focus: "Pull (Back, Rear Delts & Biceps - Spine Safe)",
-        isRestDay: false,
-        warmup: ["Cat-Cow Spine Mobilization", "Band Pull-aparts (2x15)", "Light Lat Pulldowns"],
-        cooldown: ["Dead Hangs on Bar (2x30s)", "Bicep Wall Stretch"],
-        exercises: [
-          {
-            id: "ex-6",
-            name: "Chest-Supported Incline Dumbbell Row",
-            targetMuscle: "Lats, Rhomboids, Mid-Back",
-            sets: 4,
-            reps: "10-12 reps",
-            restSeconds: 90,
-            formTips: "Lie chest down on 45° incline bench. Pull elbows back towards hips. Takes 100% pressure off your lower back!",
-            safetyNote: "Zero lower back strain due to chest support."
-          },
-          {
-            id: "ex-7",
-            name: "Wide-Grip Lat Pulldown",
-            targetMuscle: "Upper Lats (V-Taper)",
-            sets: 4,
-            reps: "10-12 reps",
-            restSeconds: 75,
-            formTips: "Slight lean back (10°), pull bar to upper clavicle, squeeze shoulder blades down and back."
-          },
-          {
-            id: "ex-8",
-            name: "Seated Cable Row (Close Neutral Grip)",
-            targetMuscle: "Mid Back Thickness",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 75,
-            formTips: "Maintain neutral spine, drive elbows straight back, feel the deep stretch."
-          },
-          {
-            id: "ex-9",
-            name: "Face Pulls with Rope",
-            targetMuscle: "Rear Delts & Rotator Cuff",
-            sets: 4,
-            reps: "15 reps",
-            restSeconds: 60,
-            formTips: "Pull towards forehead, rotate hands externally at finish."
-          },
-          {
-            id: "ex-10",
-            name: "Incline Dumbbell Bicep Curls",
-            targetMuscle: "Biceps (Long Head Peak)",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 60,
-            formTips: "Let arms hang straight down for deep bicep stretch, curl with controlled tempo."
-          },
-          {
-            id: "ex-11",
-            name: "Dumbbell Hammer Curls",
-            targetMuscle: "Brachialis & Forearms (Arm Thickness)",
-            sets: 3,
-            reps: "12 reps",
-            restSeconds: 60,
-            formTips: "Palms facing each other, squeeze at peak."
-          }
-        ]
-      },
-      {
-        dayNumber: 3,
-        dayName: "Wednesday",
-        focus: "Legs & Core (Joint Safe)",
-        isRestDay: false,
-        warmup: ["Bodyweight Squats (2x15)", "Leg Swings (Front/Side)", "Glute Bridges (2x15)"],
-        cooldown: ["Hamstring Seated Stretch", "Quad Stretch", "Cobra Pose"],
-        exercises: [
-          {
-            id: "ex-12",
-            name: "Leg Press (High & Medium Foot Placement)",
-            targetMuscle: "Quadriceps & Glutes",
-            sets: 4,
-            reps: "10-12 reps",
-            restSeconds: 90,
-            formTips: "Keep lower back flat against pad at all times. Do not lock knees completely at top.",
-            safetyNote: "Safely builds leg mass without compressive axial spine loading."
-          },
-          {
-            id: "ex-13",
-            name: "Dumbbell Romanian Deadlift (RDL)",
-            targetMuscle: "Hamstrings & Glute-Ham Tie-in",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 90,
-            formTips: "Soft knee bend, push hips far back as if touching a wall behind you. Stop when hips stop moving back.",
-            safetyNote: "Keep dumbbells close to shins to avoid lumbar torque."
-          },
-          {
-            id: "ex-14",
-            name: "Seated Leg Extensions",
-            targetMuscle: "Quad Teardrop (Vastus Medialis)",
-            sets: 3,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "1 second pause at full contraction, slow 2 second lowering."
-          },
-          {
-            id: "ex-15",
-            name: "Lying or Seated Leg Curls",
-            targetMuscle: "Hamstrings",
-            sets: 3,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "Dorsiflex ankles, squeeze heels toward glutes."
-          },
-          {
-            id: "ex-16",
-            name: "Standing Calf Raises (Smith Machine or Step)",
-            targetMuscle: "Calves (Gastrocnemius)",
-            sets: 4,
-            reps: "15-20 reps",
-            restSeconds: 45,
-            formTips: "Full deep stretch at bottom, 2 second hold on tiptoes."
-          },
-          {
-            id: "ex-17",
-            name: "Hanging Leg / Knee Raises & Plank",
-            targetMuscle: "Abs & Core Stability",
-            sets: 3,
-            reps: "15 reps / 45s plank",
-            restSeconds: 45,
-            formTips: "Posterior pelvic tilt, avoid swinging."
-          }
-        ]
-      },
-      {
-        dayNumber: 4,
-        dayName: "Thursday",
-        focus: "Active Recovery & Mobility Day",
-        isRestDay: true,
-        warmup: ["Light 15-min walk", "Thoracic Spine Mobility", "Hip Openers"],
-        cooldown: ["Full body stretching routine"],
-        exercises: []
-      },
-      {
-        dayNumber: 5,
-        dayName: "Friday",
-        focus: "Upper Body Hypertrophy",
-        isRestDay: false,
-        warmup: ["Arm rotations", "Band pull-aparts", "Light pushups"],
-        cooldown: ["Shoulder & Lat stretches"],
-        exercises: [
-          {
-            id: "ex-18",
-            name: "Barbell / Dumbbell Flat Bench Press",
-            targetMuscle: "Chest & Front Delts",
-            sets: 4,
-            reps: "8-10 reps",
-            restSeconds: 90,
-            formTips: "Plant feet firmly, moderate arch, drive bar explosively."
-          },
-          {
-            id: "ex-19",
-            name: "Neutral Grip Lat Pulldown or Pull-ups",
-            targetMuscle: "Lats & Mid-Back",
-            sets: 4,
-            reps: "8-12 reps",
-            restSeconds: 75,
-            formTips: "Pull elbows down into pockets."
-          },
-          {
-            id: "ex-20",
-            name: "Dumbbell Standing Arnold Press",
-            targetMuscle: "All 3 Shoulder Heads",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 75,
-            formTips: "Rotate palms from facing chest outwards as you press overhead smoothly."
-          },
-          {
-            id: "ex-21",
-            name: "Cable Chest Flyes (Low to High)",
-            targetMuscle: "Upper & Inner Chest Line",
-            sets: 3,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "Cross hands slightly at peak for maximum chest squeeze."
-          },
-          {
-            id: "ex-22",
-            name: "EZ Bar Preacher Curls",
-            targetMuscle: "Biceps Short Head",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 60,
-            formTips: "Arms locked in place on pad, isolate bicep without shoulder help."
-          },
-          {
-            id: "ex-23",
-            name: "Overhead Dumbbell Tricep Extension",
-            targetMuscle: "Triceps Long Head (Big Arm Mass)",
-            sets: 3,
-            reps: "10-12 reps",
-            restSeconds: 60,
-            formTips: "Keep upper arms vertical, deep stretch behind neck."
-          }
-        ]
-      },
-      {
-        dayNumber: 6,
-        dayName: "Saturday",
-        focus: "Lower Body & Arms / Weak Points",
-        isRestDay: false,
-        warmup: ["Dynamic leg swings", "Glute bridges"],
-        cooldown: ["Hamstring & Hip flexor stretches"],
-        exercises: [
-          {
-            id: "ex-24",
-            name: "Goblet Squats (with Dumbbell)",
-            targetMuscle: "Quads & Core",
-            sets: 4,
-            reps: "12 reps",
-            restSeconds: 75,
-            formTips: "Hold dumbbell close to chest. Upright torso takes stress off lower back.",
-            safetyNote: "Safest squat variation for lumbar comfort."
-          },
-          {
-            id: "ex-25",
-            name: "Walking Dumbbell Lunges",
-            targetMuscle: "Quads, Glutes & Hamstrings",
-            sets: 3,
-            reps: "12 steps per leg",
-            restSeconds: 75,
-            formTips: "90-degree knee bend on each stride."
-          },
-          {
-            id: "ex-26",
-            name: "Seated Cable / Dumbbell Lateral Raises",
-            targetMuscle: "Side Delts",
-            sets: 4,
-            reps: "15 reps",
-            restSeconds: 45,
-            formTips: "Seated position prevents body momentum cheating."
-          },
-          {
-            id: "ex-27",
-            name: "Cable Bicep Curls (Straight Bar)",
-            targetMuscle: "Biceps",
-            sets: 3,
-            reps: "12-15 reps",
-            restSeconds: 60,
-            formTips: "Constant tension throughout whole range."
-          }
-        ]
-      },
-      {
-        dayNumber: 7,
-        dayName: "Sunday",
-        focus: "Complete Rest & Weekly Review Day",
-        isRestDay: true,
-        warmup: ["Relaxed walking or foam rolling"],
-        cooldown: ["Light deep breathing"],
-        exercises: []
-      }
-    ]
-  },
-  dietChart: {
-    dietType: "High Protein Vegetarian Muscle Building Diet (140g Protein)",
-    meals: [
-      {
-        mealName: "1. Morning Nashta / Breakfast (8:00 AM)",
-        timing: "8:00 AM",
-        mealProtein: 30,
-        mealCalories: 580,
-        notes: "Rich in complex carbs, dietary fiber, and healthy fats for morning energy.",
-        items: [
-          {
-            food: "70g Rolled Oats cooked in 250ml Milk",
-            protein: 14,
-            calories: 360,
-            alternative: "Poha with 50g roasted peanuts or Besan Chilla with paneer stuffing"
-          },
-          {
-            food: "1 Banana + 1 tbsp Peanut Butter (20g) + 5 Almonds",
-            protein: 7,
-            calories: 180,
-            alternative: "1 Apple + 1 tbsp Chia/Flax seeds"
-          },
-          {
-            food: "1 scoop Whey Protein in water (or 100g Greek yogurt)",
-            protein: 24,
-            calories: 120,
-            alternative: "250ml Soy milk or 80g Paneer cubes"
-          }
-        ]
-      },
-      {
-        mealName: "2. Mid-Morning Snack (11:30 AM)",
-        timing: "11:30 AM",
-        mealProtein: 22,
-        mealCalories: 340,
-        notes: "Quick protein snack to maintain constant amino acid levels.",
-        items: [
-          {
-            food: "100g Fresh Low Fat Paneer (Raw with chaat masala or pan tossed)",
-            protein: 18,
-            calories: 220,
-            alternative: "100g Tofu or 1 cup Boiled Sprouted Moong"
-          },
-          {
-            food: "1 Whole Fruit (Seasonal Orange / Guava / Apple)",
-            protein: 2,
-            calories: 80,
-            alternative: "Cucumber & Tomato bowl with lemon"
-          }
-        ]
-      },
-      {
-        mealName: "3. Dopahar ka Khana / Lunch (1:30 PM)",
-        timing: "1:30 PM",
-        mealProtein: 36,
-        mealCalories: 680,
-        notes: "Heavy balanced meal fueling afternoon glycogen and muscle recovery.",
-        items: [
-          {
-            food: "45g Soya Chunks (boiled & cooked with light masala/veggies)",
-            protein: 24,
-            calories: 150,
-            alternative: "150g Paneer Bhurji or 1.5 cup Rajma / Chhole"
-          },
-          {
-            food: "2 Whole Wheat Rotis (Multigrain/Atta) + 1 small bowl Rice (100g)",
-            protein: 8,
-            calories: 280,
-            alternative: "3 Phulkas without butter"
-          },
-          {
-            food: "1 large bowl Dal (Moong/Arhar) + 1 bowl Green Veggies (Bhindi/Gobi)",
-            protein: 8,
-            calories: 160,
-            alternative: "Palak Paneer or Mixed veg curry"
-          },
-          {
-            food: "1 bowl Curd/Dahi (150g) + Fresh Salad",
-            protein: 6,
-            calories: 90,
-            alternative: "Buttermilk (Chaas) with roasted jeera"
-          }
-        ]
-      },
-      {
-        mealName: "4. Pre-Workout Snack (5:00 PM - 45 mins before gym)",
-        timing: "5:00 PM",
-        mealProtein: 8,
-        mealCalories: 260,
-        notes: "Fast-acting carbs for intense gym pump and muscle endurance.",
-        items: [
-          {
-            food: "2 Brown Bread slices with 1.5 tbsp Peanut butter",
-            protein: 9,
-            calories: 240,
-            alternative: "2 Boiled Potatoes with salt & pepper or 1 cup Dalia"
-          },
-          {
-            food: "1 cup Black Coffee / Green Tea (Sugar free)",
-            protein: 0,
-            calories: 5,
-            alternative: "Pre-workout scoop or warm water with lemon"
-          }
-        ]
-      },
-      {
-        mealName: "5. Post-Workout Shake (7:30 PM - Immediately after gym)",
-        timing: "7:30 PM",
-        mealProtein: 26,
-        mealCalories: 180,
-        notes: "Rapid protein absorption to jumpstart muscle protein synthesis.",
-        items: [
-          {
-            food: "1 Scoop Whey Protein (in 250ml cold water) + 3g Creatine Monohydrate",
-            protein: 24,
-            calories: 120,
-            alternative: "Homemade Sattu Drink (40g Sattu + 200ml Curd + Chaat masala)"
-          },
-          {
-            food: "1 Banana or 2 Medjool Dates",
-            protein: 1,
-            calories: 90,
-            alternative: "1 cup coconut water"
-          }
-        ]
-      },
-      {
-        mealName: "6. Raat ka Khana / Dinner (9:00 PM)",
-        timing: "9:00 PM",
-        mealProtein: 30,
-        mealCalories: 550,
-        notes: "Clean night meal promoting overnight muscle recovery without heavy fat storage.",
-        items: [
-          {
-            food: "80g Paneer + Mixed Bell Peppers & Broccoli Stir-Fry",
-            protein: 16,
-            calories: 220,
-            alternative: "100g Tofu & Mushroom stir-fry"
-          },
-          {
-            food: "1.5 cup Boiled Chana / Rajma / Mixed Dal",
-            protein: 12,
-            calories: 210,
-            alternative: "1 bowl Black Chana Chaat"
-          },
-          {
-            food: "1 Multi-grain Roti or 1 small bowl Brown/White Rice",
-            protein: 4,
-            calories: 120,
-            alternative: "Quinoa bowl or 2 Jowar rotis"
-          }
-        ]
-      }
-    ],
-    supplementsGuidance: [
-      {
-        name: "Creatine Monohydrate",
-        purpose: "Increases muscle ATP power, strength in heavy sets, and muscle fullness.",
-        dosageTiming: "3-5g daily at any fixed time (e.g. Post-workout with water/carb). No loading phase strictly needed.",
-        isOptional: false
-      },
-      {
-        name: "Whey Protein Concentrate / Isolate",
-        purpose: "High bioavailable protein to meet daily 140g target conveniently.",
-        dosageTiming: "1 scoop (24-27g protein) post-workout or in breakfast oats.",
-        isOptional: false
-      },
-      {
-        name: "Omega-3 (Fish Oil or Algal/Flaxseed Oil)",
-        purpose: "Joint lubrication, reduces inflammation, and aids heart health.",
-        dosageTiming: "1 capsule daily with dinner or breakfast.",
-        isOptional: true
-      },
-      {
-        name: "Vitamin D3 + K2 & Multivitamin",
-        purpose: "Optimal testosterone synthesis, bone density, and immune defense.",
-        dosageTiming: "1 tablet with a fat-containing meal (Breakfast/Lunch).",
-        isOptional: true
-      }
-    ],
-    generalTips: [
-      "Water Intake: Kam se kam 3.5 to 4 Liters paani roz peeyein.",
-      "Sleep: 7-8 ghante ki uninterrupted neend muscle recovery aur growth hormone release ke liye mandatory hai.",
-      "Progressive Overload: Har hafte weights ya reps mein thoda izafa (increase) karne ki koshish karein.",
-      "Rest days are when muscles actually grow! Eat your full protein target on rest days too."
-    ]
-  }
+export const SAMPLE_WORKOUT_PLAN: WorkoutPlan = {
+  id: 'wp-sample-1',
+  weekNumber: 1,
+  generatedAt: new Date().toISOString(),
+  splitName: 'Joint-Friendly Push / Pull / Legs (5-Day Body Sculpt)',
+  overview: 'A high-stimulus, low-joint-stress split specifically structured with knee-friendly leg exercises and progressive hypertrophy.',
+  hindiOverview: 'Joint-safe 5-day workout plan jisme knee pain ko bachate hue maximum muscle growth aur fat burn hoga.',
+  weeklyCardioRecommendation: '20 minutes of incline treadmill walking or stationary cycling after workout (3-4x per week).',
+  injurySafetyNotes: [
+    'Right Knee Caution: Replace deep barbell squats with Goblet Box Squats and focus on Hamstring curls & Romanian Deadlifts.',
+    'Warm-up thoroughly with 5 minutes of hip circles and glute activation before any lower body exercises.',
+  ],
+  schedule: [
+    {
+      dayNumber: 1,
+      dayName: 'Monday',
+      focus: 'Chest, Shoulders & Triceps (Push Day)',
+      hindiFocus: 'Chest aur Triceps ki shandar workout',
+      isRestDay: false,
+      durationMinutes: 50,
+      warmup: ['Arm circles (20 reps)', 'Band pull-aparts (15 reps)', 'Dynamic chest wall stretch (1 min)'],
+      cooldown: ['Doorway chest stretch (1 min)', 'Overhead triceps stretch (1 min)', 'Deep relaxed breathing'],
+      exercises: [
+        {
+          id: 'ex-1',
+          name: 'Incline Dumbbell Bench Press',
+          hindiName: 'Incline Dumbbell Chest Press',
+          targetMuscle: 'Upper Chest (Clavicular Pectorals)',
+          secondaryMuscle: 'Front Deltoids, Triceps',
+          sets: 4,
+          reps: '10-12',
+          restSeconds: 90,
+          equipment: 'Dumbbells & Incline Bench (30° angle)',
+          formTips: [
+            'Keep shoulder blades retracted and firmly planted into the bench',
+            'Lower weights until dumbbells align with upper chest at a 45-degree elbow angle',
+            'Squeeze chest at the top without clanking dumbbells together',
+          ],
+          mistakesToAvoid: ['Flaring elbows out wide at 90 degrees (strains rotator cuff)', 'Arching lower back excessively off the bench'],
+          injuryModifications: 'If shoulder feels pinch, use a neutral palms-facing-in grip.',
+          alternativeExercise: 'Incline Machine Chest Press or Push-ups with hands elevated',
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', actualWeightKg: 18, actualReps: 12, isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', actualWeightKg: 20, actualReps: 10, isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', actualWeightKg: 20, actualReps: 10, isCompleted: false },
+            { setNumber: 4, targetReps: '10-12', actualWeightKg: 22, actualReps: 8, isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-2',
+          name: 'Flat Dumbbell Press',
+          hindiName: 'Flat Dumbbell Chest Press',
+          targetMuscle: 'Mid Pectorals',
+          secondaryMuscle: 'Triceps',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: 'Dumbbells & Flat Bench',
+          formTips: [
+            'Maintain a slight natural arch in lower back and feet flat on floor',
+            'Control the 3-second eccentric descent for maximum hypertrophy stimulus',
+          ],
+          mistakesToAvoid: ['Bouncing weights or dropping elbows too low below shoulder plane'],
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-3',
+          name: 'Dumbbell Lateral Raises (Side Delts)',
+          hindiName: 'Dumbbell Side Raises (Choudhe Kandhe)',
+          targetMuscle: 'Lateral Deltoids (Shoulders)',
+          sets: 4,
+          reps: '12-15',
+          restSeconds: 60,
+          equipment: 'Light Dumbbells',
+          formTips: [
+            'Slight forward torso lean (10-15 degrees)',
+            'Lead with elbows, pouring water motion at top',
+            'Pause for 1 second at shoulder level',
+          ],
+          mistakesToAvoid: ['Using body momentum/swinging from hips', 'Shrugging traps up to ears'],
+          setLogs: [
+            { setNumber: 1, targetReps: '12-15', isCompleted: false },
+            { setNumber: 2, targetReps: '12-15', isCompleted: false },
+            { setNumber: 3, targetReps: '12-15', isCompleted: false },
+            { setNumber: 4, targetReps: '12-15', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-4',
+          name: 'Cable Tricep Rope Pushdowns',
+          hindiName: 'Cable Rope Tricep Extension',
+          targetMuscle: 'Triceps (Lateral & Medial heads)',
+          sets: 3,
+          reps: '12-15',
+          restSeconds: 60,
+          equipment: 'Cable Pulley with Rope',
+          formTips: [
+            'Lock elbows tight at side of ribs',
+            'Spread rope apart at the bottom and squeeze triceps hard for 1 second',
+          ],
+          mistakesToAvoid: ['Letting elbows drift forward and using shoulder momentum'],
+          setLogs: [
+            { setNumber: 1, targetReps: '12-15', isCompleted: false },
+            { setNumber: 2, targetReps: '12-15', isCompleted: false },
+            { setNumber: 3, targetReps: '12-15', isCompleted: false },
+          ],
+        },
+      ],
+    },
+    {
+      dayNumber: 2,
+      dayName: 'Tuesday',
+      focus: 'Back & Biceps (Pull Day)',
+      hindiFocus: 'V-Taper Back aur Biceps ki workout',
+      isRestDay: false,
+      durationMinutes: 50,
+      warmup: ['Cat-Cow spine mobility (10 reps)', 'Dead-hang on pullup bar (30 sec)', 'Light band lat pulldowns'],
+      cooldown: ['Child’s pose lat stretch (1 min)', 'Doorway bicep stretch', 'Foam rolling upper back'],
+      exercises: [
+        {
+          id: 'ex-5',
+          name: 'Lat Pulldowns (Wide / Neutral Grip)',
+          hindiName: 'Lat Pulldown Machine',
+          targetMuscle: 'Lats (Latissimus Dorsi)',
+          secondaryMuscle: 'Biceps & Upper Back',
+          sets: 4,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: 'Cable Lat Pulldown Machine',
+          formTips: [
+            'Grip bar slightly wider than shoulder width',
+            'Drive elbows down towards hips and pull bar to upper chest',
+            'Avoid excessive leaning back beyond 15 degrees',
+          ],
+          mistakesToAvoid: ['Pulling behind the neck (dangerous for cervical spine)', 'Using momentum to yank weight down'],
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+            { setNumber: 4, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-6',
+          name: 'Chest-Supported Dumbbell Rows',
+          hindiName: 'Incline Bench Par Dumbbell Row',
+          targetMuscle: 'Mid-Back, Rhomboids, Lower Traps',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: 'Incline Bench & Dumbbells',
+          formTips: [
+            'Lying chest-down eliminates all lower back strain',
+            'Pull dumbbells up towards waist while squeezing shoulder blades together',
+          ],
+          mistakesToAvoid: ['Lifting chest off the pad', 'Using jerky arm pulls instead of back retraction'],
+          injuryModifications: 'Safest row variation for lower back disc or tightness.',
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-7',
+          name: 'Incline Dumbbell Bicep Curls',
+          hindiName: 'Incline Bench Bicep Curl',
+          targetMuscle: 'Biceps (Long Head peak)',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 60,
+          equipment: 'Incline Bench (45°) & Dumbbells',
+          formTips: [
+            'Let arms hang perpendicular to floor to put maximum stretch on bicep long head',
+            'Curl up smoothly without shifting elbows forward',
+          ],
+          mistakesToAvoid: ['Swinging shoulders to initiate curl'],
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+      ],
+    },
+    {
+      dayNumber: 3,
+      dayName: 'Wednesday',
+      focus: 'Legs & Core (Knee-Friendly Hypertrophy)',
+      hindiFocus: 'Knee-safe Legs aur Core workout',
+      isRestDay: false,
+      durationMinutes: 45,
+      warmup: ['Glute bridge holds (10 reps x 5s hold)', 'Bodyweight box squats with slow tempo', 'Ankle mobility wall touches'],
+      cooldown: ['Hamstring stretch on bench (1 min per leg)', 'Pigeon pose for glutes (1 min)', 'Quad stretch standing'],
+      exercises: [
+        {
+          id: 'ex-8',
+          name: 'Dumbbell Romanian Deadlifts (RDL)',
+          hindiName: 'Dumbbell Romanian Deadlift (Hamstrings & Glutes)',
+          targetMuscle: 'Hamstrings & Gluteus Maximus',
+          secondaryMuscle: 'Lower Back & Core',
+          sets: 4,
+          reps: '10-12',
+          restSeconds: 90,
+          equipment: 'Dumbbells',
+          formTips: [
+            'Slight soft bend in knees (knees do NOT bend further during movement)',
+            'Hinge at hips, pushing butt straight back towards the wall',
+            'Keep dumbbells close to shins and spine completely straight',
+          ],
+          mistakesToAvoid: ['Squatting instead of hip hinging', 'Rounding the lower back'],
+          injuryModifications: 'Zero knee shearing force - fantastic builder for knee tendon stability.',
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+            { setNumber: 4, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-9',
+          name: 'Goblet Box Squats (Controlled Depth)',
+          hindiName: 'Goblet Box Squat (Knee-Safe Squatting)',
+          targetMuscle: 'Quadriceps & Glutes',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: '1 Dumbbell & Knee-Height Bench/Box',
+          formTips: [
+            'Hold dumbbell vertically against upper chest',
+            'Sit back onto box softly, pause 1 second without rocking, drive up through heels',
+          ],
+          mistakesToAvoid: ['Dropping hard on box', 'Letting knees cave inward'],
+          injuryModifications: 'Box limits knee flexion angle, stopping patellar pain completely.',
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-10',
+          name: 'Seated or Lying Hamstring Leg Curls',
+          hindiName: 'Leg Curl Machine',
+          targetMuscle: 'Hamstrings',
+          sets: 3,
+          reps: '12-15',
+          restSeconds: 60,
+          equipment: 'Leg Curl Machine',
+          formTips: [
+            'Curl heels toward glutes and squeeze for 1 second',
+            'Control weight for 3 seconds on the way back',
+          ],
+          mistakesToAvoid: ['Arching lower back off the pad'],
+          setLogs: [
+            { setNumber: 1, targetReps: '12-15', isCompleted: false },
+            { setNumber: 2, targetReps: '12-15', isCompleted: false },
+            { setNumber: 3, targetReps: '12-15', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-11',
+          name: 'Dead Bug / Plank Core Hold',
+          hindiName: 'Core Strength & Stability Hold',
+          targetMuscle: 'Transverse Abdominis & Deep Core',
+          sets: 3,
+          reps: '45-60s hold',
+          restSeconds: 60,
+          equipment: 'Exercise Mat',
+          formTips: [
+            'Keep lower back pressed flat into the floor (no arch)',
+            'Breathe rhythmically while holding pelvic tension',
+          ],
+          mistakesToAvoid: ['Holding breath', 'Sagging hips in plank'],
+          setLogs: [
+            { setNumber: 1, targetReps: '45s', isCompleted: false },
+            { setNumber: 2, targetReps: '45s', isCompleted: false },
+            { setNumber: 3, targetReps: '45s', isCompleted: false },
+          ],
+        },
+      ],
+    },
+    {
+      dayNumber: 4,
+      dayName: 'Thursday',
+      focus: 'Active Recovery & Mobility',
+      hindiFocus: 'Rest aur Joint Recovery Day',
+      isRestDay: true,
+      durationMinutes: 20,
+      warmup: ['Full body joint rotations (5 min)'],
+      cooldown: ['Gentle yoga stretching (10 min)'],
+      exercises: [],
+    },
+    {
+      dayNumber: 5,
+      dayName: 'Friday',
+      focus: 'Upper Body Hypertrophy & Arms',
+      hindiFocus: 'Upper Body, Biceps aur Triceps Power',
+      isRestDay: false,
+      durationMinutes: 45,
+      warmup: ['Dynamic shoulder rotations', 'Light resistance band facepulls'],
+      cooldown: ['Upper body stretch routine'],
+      exercises: [
+        {
+          id: 'ex-12',
+          name: 'Seated Cable Row (Close Grip)',
+          hindiName: 'Seated Cable Row Machine',
+          targetMuscle: 'Middle Trapezius & Lats',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: 'Cable Row Machine with V-bar',
+          formTips: ['Keep chest lifted and pull handle into lower abdomen', 'Squeeze lats for 1 second'],
+          mistakesToAvoid: ['Swinging torso back and forth'],
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-13',
+          name: 'Dumbbell Overhead Shoulder Press',
+          hindiName: 'Dumbbell Shoulder Press',
+          targetMuscle: 'Anterior & Lateral Deltoids',
+          sets: 3,
+          reps: '10-12',
+          restSeconds: 75,
+          equipment: 'Dumbbells & 75° Bench',
+          formTips: ['Press dumbbells straight up in smooth arc', 'Keep core braced and ribs tucked'],
+          mistakesToAvoid: ['Hyperextending spine'],
+          setLogs: [
+            { setNumber: 1, targetReps: '10-12', isCompleted: false },
+            { setNumber: 2, targetReps: '10-12', isCompleted: false },
+            { setNumber: 3, targetReps: '10-12', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-14',
+          name: 'Hammer Curls (Forearms & Brachialis)',
+          hindiName: 'Dumbbell Hammer Curl (Thick Arms)',
+          targetMuscle: 'Brachialis & Forearm Brachioradialis',
+          sets: 3,
+          reps: '12-15',
+          restSeconds: 60,
+          equipment: 'Dumbbells',
+          formTips: ['Keep palms facing each other throughout the curl', 'Great for arm thickness and wrist health'],
+          mistakesToAvoid: ['Elbow drift'],
+          setLogs: [
+            { setNumber: 1, targetReps: '12-15', isCompleted: false },
+            { setNumber: 2, targetReps: '12-15', isCompleted: false },
+            { setNumber: 3, targetReps: '12-15', isCompleted: false },
+          ],
+        },
+      ],
+    },
+    {
+      dayNumber: 6,
+      dayName: 'Saturday',
+      focus: 'Posterior Chain, Glutes & HIIT Cardio',
+      hindiFocus: 'Glutes, Calves aur Fat Burning Cardio',
+      isRestDay: false,
+      durationMinutes: 40,
+      warmup: ['Light 5 min treadmill warmup', 'Dynamic leg swings'],
+      cooldown: ['Full body cool down stretch'],
+      exercises: [
+        {
+          id: 'ex-15',
+          name: 'Barbell or Dumbbell Hip Thrusts',
+          hindiName: 'Bench Par Hip Thrust (Glute Builder)',
+          targetMuscle: 'Gluteus Maximus',
+          sets: 4,
+          reps: '12-15',
+          restSeconds: 75,
+          equipment: 'Bench & Barbell or Heavy Dumbbell with Pad',
+          formTips: [
+            'Upper back resting against bench below shoulder blades',
+            'Drive through heels and lock out hips at 90-degree knee angle',
+            'Chin tucked forward, look straight ahead to protect neck',
+          ],
+          mistakesToAvoid: ['Hyperextending lower back at top'],
+          injuryModifications: 'Zero compressive stress on knees or spine.',
+          setLogs: [
+            { setNumber: 1, targetReps: '12-15', isCompleted: false },
+            { setNumber: 2, targetReps: '12-15', isCompleted: false },
+            { setNumber: 3, targetReps: '12-15', isCompleted: false },
+            { setNumber: 4, targetReps: '12-15', isCompleted: false },
+          ],
+        },
+        {
+          id: 'ex-16',
+          name: 'Standing Calf Raises',
+          hindiName: 'Calf Muscle Raises',
+          targetMuscle: 'Gastrocnemius & Soleus',
+          sets: 3,
+          reps: '15-20',
+          restSeconds: 45,
+          equipment: 'Step or Calf Block & Dumbbell',
+          formTips: ['Full stretch at bottom, explosive rise onto big toes, 2-sec contraction at top'],
+          mistakesToAvoid: ['Bouncing fast'],
+          setLogs: [
+            { setNumber: 1, targetReps: '15-20', isCompleted: false },
+            { setNumber: 2, targetReps: '15-20', isCompleted: false },
+            { setNumber: 3, targetReps: '15-20', isCompleted: false },
+          ],
+        },
+      ],
+    },
+    {
+      dayNumber: 7,
+      dayName: 'Sunday',
+      focus: 'Complete Rest & Muscle Recovery',
+      hindiFocus: 'Poora Aaram aur Healthy Meals',
+      isRestDay: true,
+      durationMinutes: 0,
+      warmup: [],
+      cooldown: [],
+      exercises: [],
+    },
+  ],
 };
+
+export const SAMPLE_DIET_PLAN: DietPlan = {
+  id: 'dp-sample-1',
+  weekNumber: 1,
+  generatedAt: new Date().toISOString(),
+  overview: 'High-Protein Vegetarian Fat-Loss & Muscle Preservation Diet with high fiber and joint-supportive micro-nutrients.',
+  hindiOverview: 'High protein vegetarian diet chart jisme Paneer, Dal, Dahi aur Sprouts se 135g clean protein aur fat loss milega.',
+  macroTargets: {
+    calories: 2050,
+    proteinGrams: 135,
+    carbsGrams: 215,
+    fatsGrams: 55,
+    fiberGrams: 34,
+    waterLiters: 3.5,
+  },
+  healthPrecautions: [
+    'Right knee recovery: Include anti-inflammatory foods like turmeric with black pepper (Curcumin) and ginger in meals.',
+    'Hydration is vital for joint synovial fluid lubrication. Keep water intake at 3.5L daily.',
+    'Take high-protein meals evenly spaced (every 3.5-4 hours) to optimize Muscle Protein Synthesis (MPS).',
+  ],
+  hydrationGuidelines: 'Drink 500ml warm water upon waking, 250ml every hour, and 500ml during your workout.',
+  supplementRecommendations: [
+    {
+      name: 'Whey Protein Concentrate / Plant Protein (Optional)',
+      timing: 'Post-workout with water or 200ml skim milk',
+      purpose: 'Fast 24g bioavailable protein for muscle repair',
+      isOptional: true,
+    },
+    {
+      name: 'Omega-3 Fish Oil or Algal DHA (Optional)',
+      timing: '1 capsule with lunch',
+      purpose: 'Reduces joint inflammation and supports heart health',
+      isOptional: true,
+    },
+  ],
+  meals: [
+    {
+      id: 'm-1',
+      timeSlot: '8:00 AM',
+      mealType: 'breakfast',
+      title: 'Power Protein Besan-Paneer Chilla & Curd',
+      hindiTitle: 'Besan Paneer Chilla aur Taaza Dahi',
+      calories: 490,
+      protein: 34,
+      carbs: 48,
+      fats: 16,
+      items: [
+        {
+          id: 'mi-1',
+          name: 'Besan (Gram Flour) Chilla stuffed with Paneer',
+          hindiName: '2 Besan Chilla (60g paneer stuffing ke saath)',
+          portion: '2 medium chilla (60g besan + 60g low fat paneer)',
+          calories: 380,
+          protein: 28,
+          carbs: 38,
+          fats: 14,
+          description: 'Cooked with 1 tsp cold pressed mustard or olive oil, added onions, green chilies and coriander',
+        },
+        {
+          id: 'mi-2',
+          name: 'Fresh Homemade Dahi (Curd) with Flax Seeds',
+          hindiName: '1 katori dahi alsi ke beej ke saath',
+          portion: '100g curd + 1 tsp ground flaxseed',
+          calories: 110,
+          protein: 6,
+          carbs: 10,
+          fats: 2,
+          description: 'Supplies natural probiotics for digestion and omega-3 alpha-linolenic acid',
+        },
+      ],
+      swaps: {
+        vegetarianSwap: '3 Egg white + 1 Whole egg omelette with 2 multigrain bread slices',
+        quickAlternative: 'Rolled Oats (50g) cooked in warm milk with 1 scoop protein powder, chia seeds & half apple',
+      },
+      healthBenefitNote: 'Complex carbs and high protein keep blood sugar stable and prevent mid-morning energy crashes.',
+    },
+    {
+      id: 'm-2',
+      timeSlot: '1:00 PM',
+      mealType: 'lunch',
+      title: 'Balanced Indian High-Protein Thali',
+      hindiTitle: 'Soya Chunks & Dal Balanced Lunch',
+      calories: 620,
+      protein: 42,
+      carbs: 75,
+      fats: 15,
+      items: [
+        {
+          id: 'mi-3',
+          name: 'Soya Chunks & Matar Curry',
+          hindiName: 'Soya chunks curry (45g dry soya chunks)',
+          portion: '1 large bowl (45g soya chunks)',
+          calories: 220,
+          protein: 24,
+          carbs: 18,
+          fats: 4,
+          description: '52% pure plant protein by weight, boiled and cooked in tomato-onion-ginger gravy',
+        },
+        {
+          id: 'mi-4',
+          name: 'Yellow Moong or Toor Dal',
+          hindiName: '1 bowl Moong Dal Tadka',
+          portion: '1 medium bowl (150ml)',
+          calories: 140,
+          protein: 8,
+          carbs: 22,
+          fats: 2,
+          description: 'Light on gut, rich in folate and magnesium',
+        },
+        {
+          id: 'mi-5',
+          name: 'Multigrain Phulka (Roti) or Brown Rice',
+          hindiName: '2 Roti ya 1 katori Chawal',
+          portion: '2 rotis (no excess ghee) or 150g cooked rice',
+          calories: 200,
+          protein: 6,
+          carbs: 40,
+          fats: 2,
+          description: 'Slow-digesting fiber for sustained afternoon fullness',
+        },
+        {
+          id: 'mi-6',
+          name: 'Fresh Rainbow Salad (Cucumber, Tomato, Beetroot, Carrot)',
+          hindiName: 'Harra Bhara Salad nimbu ke saath',
+          portion: '1 bowl with lemon juice & pinch of rock salt',
+          calories: 60,
+          protein: 4,
+          carbs: 15,
+          fats: 0,
+          description: 'Provides micronutrients, electrolytes and digestive enzymes',
+        },
+      ],
+      swaps: {
+        vegetarianSwap: 'Grilled Tofu (150g) with Quinoa or Rice and sauteed veggies',
+        quickAlternative: 'Paneer Bhurji (100g) with 2 Rotis and fresh cucumber',
+      },
+      healthBenefitNote: 'Combining legume dal with grain roti yields a complete amino acid profile for optimal muscle protein.',
+    },
+    {
+      id: 'm-3',
+      timeSlot: '5:00 PM',
+      mealType: 'pre_workout',
+      title: 'Pre-Workout Energizer & Post-Workout Boost',
+      hindiTitle: 'Pre & Post Workout Energy',
+      calories: 360,
+      protein: 28,
+      carbs: 45,
+      fats: 8,
+      items: [
+        {
+          id: 'mi-7',
+          name: '1 Banana with 1 tsp Peanut Butter & Black Coffee (Pre-Workout - 45 min before)',
+          hindiName: '1 Kela aur Black Coffee',
+          portion: '1 medium banana + 10g peanut butter',
+          calories: 160,
+          protein: 4,
+          carbs: 32,
+          fats: 4,
+          description: 'Readily available glycogen and caffeine for enhanced strength output and focus',
+        },
+        {
+          id: 'mi-8',
+          name: 'Post-Workout Protein Shake or Sattu Buttermilk (Within 45 min post gym)',
+          hindiName: 'Post Workout Protein Drink',
+          portion: '1 scoop Whey in 250ml water OR 40g Chana Sattu in chaas',
+          calories: 200,
+          protein: 24,
+          carbs: 13,
+          fats: 4,
+          description: 'Triggers rapid muscle recovery and stops muscle protein breakdown',
+        },
+      ],
+      swaps: {
+        vegetarianSwap: 'Sprouted Moong Salad (1 bowl) with roasted peanuts & pomegranate',
+        quickAlternative: '4 Boiled Egg Whites with 1 slice whole wheat toast',
+      },
+      healthBenefitNote: 'Pre-workout carbs fuel lifting intensity; post-workout amino acids initiate immediate muscle repair.',
+    },
+    {
+      id: 'm-4',
+      timeSlot: '8:30 PM',
+      mealType: 'dinner',
+      title: 'Light High-Protein Dinner for Night Recovery',
+      hindiTitle: 'Halka aur High Protein Raat ka Khana',
+      calories: 480,
+      protein: 31,
+      carbs: 47,
+      fats: 16,
+      items: [
+        {
+          id: 'mi-9',
+          name: 'Low-Fat Paneer Tikka / Sauteed Paneer with Capsicum & Broccoli',
+          hindiName: '100g Paneer Bhurji ya Paneer Tikka sabzi ke saath',
+          portion: '100g Paneer + 1 cup mixed veggies',
+          calories: 260,
+          protein: 20,
+          carbs: 10,
+          fats: 14,
+          description: 'Casein rich protein digests slowly overnight, preventing muscle catabolism during sleep',
+        },
+        {
+          id: 'mi-10',
+          name: '1 Multigrain Roti or Half bowl Brown Rice with Clear Dal Soup',
+          hindiName: '1 Roti aur Dal ka Soup',
+          portion: '1 roti + 150ml dal soup',
+          calories: 180,
+          protein: 8,
+          carbs: 32,
+          fats: 2,
+          description: 'Low glycemic bedtime carbs promote serotonin and deep restful sleep',
+        },
+        {
+          id: 'mi-11',
+          name: 'Warm Turmeric Cinnamon Water / Chamomile Tea (30 min before bed)',
+          hindiName: 'Haldi Daalchini Paani',
+          portion: '200ml warm water with 1/4 tsp turmeric & cinnamon',
+          calories: 40,
+          protein: 3,
+          carbs: 5,
+          fats: 0,
+          description: 'Potent natural anti-inflammatory for joint recovery and immune support',
+        },
+      ],
+      swaps: {
+        vegetarianSwap: 'Tofu & Mushroom Stir fry with Garlic & Brown Rice',
+        quickAlternative: 'Moong Dal Khichdi cooked with 50g low fat paneer cubes and spinach',
+      },
+      healthBenefitNote: 'Light dinner prevents nighttime acid reflux (GERD) and guarantees high quality REM recovery sleep.',
+    },
+  ],
+};
+
+export const INITIAL_PROGRESS_LOGS: ProgressLog[] = [
+  {
+    id: 'log-1',
+    date: new Date(Date.now() - 14 * 86400000).toISOString().split('T')[0],
+    weightKg: 78.0,
+    bodyFatPct: 22.5,
+    waistCm: 89,
+    chestCm: 101,
+    bicepCm: 34,
+    thighCm: 59,
+    energyScore: 3,
+    painScore: 3,
+    symptomNotes: 'Right knee felt stiff after squatting.',
+    workoutCompleted: true,
+    dietAdherencePct: 80,
+    waterLitersDrank: 2.8,
+    sleepHours: 6.5,
+    notes: 'Started the transformation program!',
+  },
+  {
+    id: 'log-2',
+    date: new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0],
+    weightKg: 77.2,
+    bodyFatPct: 21.8,
+    waistCm: 88,
+    chestCm: 101.5,
+    bicepCm: 34.2,
+    thighCm: 58.5,
+    energyScore: 4,
+    painScore: 2,
+    symptomNotes: 'Swapped back squats for box squats, knee feeling much better.',
+    workoutCompleted: true,
+    dietAdherencePct: 90,
+    waterLitersDrank: 3.2,
+    sleepHours: 7.2,
+    notes: 'Good energy, dropped 0.8 kg.',
+  },
+  {
+    id: 'log-3',
+    date: new Date().toISOString().split('T')[0],
+    weightKg: 76.5,
+    bodyFatPct: 21.0,
+    waistCm: 86.5,
+    chestCm: 102,
+    bicepCm: 34.5,
+    thighCm: 58,
+    energyScore: 5,
+    painScore: 1,
+    symptomNotes: 'Almost zero knee discomfort. Strength increasing on Incline Bench!',
+    workoutCompleted: true,
+    dietAdherencePct: 95,
+    waterLitersDrank: 3.5,
+    sleepHours: 8.0,
+    notes: 'Feeling lighter and stronger!',
+  },
+];

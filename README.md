@@ -1,56 +1,66 @@
-# FitForge AI - Workout, Diet & Health Coach
+# 🏋️‍♂️ FitGuru AI — Smart Body Transformation & Fitness Coach
 
-AI-driven personalized bodybuilding workout splits, customized diet charts, calorie & macro targets, health safety precautions, and weekly progression tracking.
+A personalized AI-powered fitness, diet, and injury-safe workout coaching system built with **React**, **TypeScript**, **Tailwind CSS**, and the **Gemini 3.7 Flash API**.
 
 ---
 
-## 🚀 GitHub Se App Ko Kaise Run Karein (How to Run Locally)
+## 🌟 Live Preview
+You can view the live application preview here:
+🔗 **[Live Demo App](https://ais-pre-cgudrlqca6lomhsezewugf-349863587252.asia-southeast1.run.app)**
 
-Agar aapne is repository ko GitHub se clone ya download kiya hai, toh niche diye steps follow karein:
+---
 
-### Step 1: Dependencies Install Karein
-Apne terminal / command prompt mein project folder open karein aur run karein:
+## ✨ Features
+
+- **Personalized Body & Health Assessment**: Calculates exact BMR, TDEE, and macronutrient targets based on age, height, current/target weight, workout location, and experience.
+- **Joint-Safe & Injury-Aware Workouts**: Tailored exercise selections (e.g. knee-friendly, lower back safe, rotator cuff protection) with sets, reps, rest intervals, and form tips.
+- **Smart Diet & Meal Plans**: Detailed breakfast, lunch, snack, and dinner breakdowns with vegetarian, non-vegetarian, vegan, Jain, and eggitarian options.
+- **Weekly Progress & Diet Adaptation**: Dynamic weekly check-in where Gemini AI evaluates weight changes and adherence to update calorie deficits and meal plans.
+- **FitGuru AI 24/7 Chat Coach**: Instant sports nutrition, meal swaps, and biomechanical form guidance with English and Hinglish support.
+- **Progress Tracking & Rest Timer**: Visual Recharts weight trend graphs, body metrics logs, and an interactive rest timer between sets.
+
+---
+
+## 🚀 Quick Start (Run Locally)
+
+### 1. Clone or Download Repository
+```bash
+git clone https://github.com/YOUR_USERNAME/fitguru-ai-coach.git
+cd fitguru-ai-coach
+```
+
+### 2. Install Dependencies
 ```bash
 npm install
 ```
 
-### Step 2: Environment Variables Setup (.env)
-Project ke root folder mein ek nayi `.env` file banayein aur usme apna Google Gemini API Key add karein:
+### 3. Setup Environment Variables
+Create a `.env` file in the root directory:
 ```env
-GEMINI_API_KEY=your_google_gemini_api_key_here
+GEMINI_API_KEY=your_gemini_api_key_here
 ```
-*(Aap apna free Gemini API key [Google AI Studio](https://aistudio.google.com/app/apikey) se generate kar sakte hain)*
 
-### Step 3: Development Server Start Karein
+### 4. Start the Application
 ```bash
 npm run dev
 ```
-Ab browser mein **`http://localhost:3000`** open karein. Aapki app full-stack features (AI Coach + Custom Workout + Diet Planner) ke sath smoothly chalegi!
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the exact live preview!
 
 ---
 
-## 🌐 Online Hosting / Deployment Guide
-
-Yeh app ek **Full-Stack Application (React + Vite + Node/Express + Gemini AI)** hai:
-
-### Option A: Render / Railway / Vercel (Recommended for Full-Stack AI)
-1. **Render.com / Railway.app** par apna GitHub repository connect karein.
-2. Build Command: `npm run build`
-3. Start Command: `npm start`
-4. Environment Variable mein `GEMINI_API_KEY` set karein.
-5. Deploy karein!
-
-### Option B: GitHub Pages (Static Hosting)
-- GitHub Pages sirf static HTML/JS/CSS host karta hai.
-- `.github/workflows/deploy.yml` file is repository mein already included hai.
-- GitHub repo settings -> **Pages** -> Source mein **"GitHub Actions"** select karein.
-- Push karne par site automatic build aur live ho jayegi.
+## 📦 Production Build
+```bash
+npm run build
+npm start
+```
 
 ---
 
-## 🛠️ Features
-- **Custom Bodybuilding Splits**: Push-Pull-Legs, Upper-Lower, Arnold Split, Bro Split, Full Body.
-- **Precision Diet Plans**: High-protein Indian & Global diets, macro targets, and portion guidance.
-- **Injury & Health Guard**: Automatic exercise replacements for joint pain, diabetes, BP, etc.
-- **Weekly Check-In & AI Recalibration**: Dynamic weekly adjustments based on weight progress.
-- **PWA & Offline Ready**: Mobile installable app with PDF export capabilities.
+## 🌐 1-Click Free Deployment
+
+### Deploy with Vercel or Render
+1. Push this repository to GitHub.
+2. Sign in to [Vercel](https://vercel.com) or [Render](https://render.com).
+3. Click **"New Project"** -> Select your GitHub repository.
+4. Add `GEMINI_API_KEY` in the **Environment Variables** section.
+5. Click **Deploy**!

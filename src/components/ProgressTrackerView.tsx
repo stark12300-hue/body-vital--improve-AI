@@ -1,432 +1,547 @@
-import React, { useState } from "react";
-import { FullPlan, ProgressEntry, UserProfile } from "../types";
-import {
-  Activity,
-  Award,
-  Calendar,
-  ChevronUp,
-  Plus,
-  Scale,
+import React, { useState } from 'react';
+import { useFitness } from '../context/FitnessContext';
+import { ProgressLog } from '../types';
+import { 
+  TrendingUp, 
+  TrendingDown, 
+  Scale, 
+  HeartPulse, 
+  Activity, 
+  Plus, 
+  Trash2, 
+  Calendar, 
+  Zap, 
+  ShieldAlert, 
   Sparkles,
-  TrendingDown,
-  TrendingUp,
+  CheckCircle2,
+  Smile,
+  Frown,
+  Meh,
   Trophy,
-  Zap,
-} from "lucide-react";
+  Flame,
+  Award,
+  ArrowRight,
+  UserPlus
+} from 'lucide-react';
 
-interface ProgressTrackerViewProps {
-  entries: ProgressEntry[];
-  onAddEntry: (entry: ProgressEntry) => void;
-  profile: UserProfile;
-  plan: FullPlan;
-  onOpenWeeklyCheckInModal: () => void;
-  onOpenChatWithQuery?: (query: string) => void;
-}
+export const ProgressTrackerView: React.FC = () => {
+  const { 
+    progressLogs, 
+    addProgressLog, 
+    deleteProgressLog, 
+    userProfile, 
+    performanceScoreBreakdown,
+    setIsRegistrationModalOpen 
+  } = useFitness();
+  const [isLogModalOpen, setIsLogModalOpen] = useState<boolean>(false);
 
-export const ProgressTrackerView: React.FC<ProgressTrackerViewProps> = ({
-  entries,
-  onAddEntry,
-  profile,
-  plan,
-  onOpenWeeklyCheckInModal,
-  onOpenChatWithQuery,
-}) => {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0]);
-  const [newWeight, setNewWeight] = useState(profile.weight);
-  const [newChest, setNewChest] = useState<number | undefined>(undefined);
-  const [newWaist, setNewWaist] = useState<number | undefined>(undefined);
-  const [newBiceps, setNewBiceps] = useState<number | undefined>(undefined);
-  const [newThighs, setNewThighs] = useState<number | undefined>(undefined);
-  const [newEnergy, setNewEnergy] = useState<"low" | "medium" | "high" | "peak">("high");
-  const [newAdherence, setNewAdherence] = useState(90);
-  const [newNotes, setNewNotes] = useState("");
-
-  const sortedEntries = [...entries].sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-
-  const initialEntry = sortedEntries[0] || { weight: profile.weight, date: "Start" };
-  const latestEntry = sortedEntries[sortedEntries.length - 1] || initialEntry;
-
-  const totalWeightChange = latestEntry.weight - initialEntry.weight;
-  const isGainGoal = profile.targetWeight > profile.weight;
-  const weightToTarget = Math.abs(profile.targetWeight - latestEntry.weight);
-
-  const handleSaveEntry = (e: React.FormEvent) => {
-    e.preventDefault();
-    const entry: ProgressEntry = {
-      id: `progress-${Date.now()}`,
-      date: newDate,
-      weight: Number(newWeight),
-      chest: newChest ? Number(newChest) : undefined,
-      waist: newWaist ? Number(newWaist) : undefined,
-      biceps: newBiceps ? Number(newBiceps) : undefined,
-      thighs: newThighs ? Number(newThighs) : undefined,
-      energyLevel: newEnergy,
-      adherenceScore: Number(newAdherence),
-      notes: newNotes || undefined,
-    };
-    onAddEntry(entry);
-    setIsModalOpen(false);
-    setNewNotes("");
-  };
-
-  // SVG Chart calculation
-  const minWeight = Math.min(...sortedEntries.map((e) => e.weight), profile.targetWeight) - 2;
-  const maxWeight = Math.max(...sortedEntries.map((e) => e.weight), profile.targetWeight) + 2;
-  const range = maxWeight - minWeight || 1;
-
-  const chartHeight = 160;
-  const chartWidth = 500;
-
-  const points = sortedEntries.map((entry, index) => {
-    const x = (index / Math.max(sortedEntries.length - 1, 1)) * (chartWidth - 40) + 20;
-    const y = chartHeight - 20 - ((entry.weight - minWeight) / range) * (chartHeight - 40);
-    return { x, y, entry };
+  // New Log Form State
+  const [newLog, setNewLog] = useState<Omit<ProgressLog, 'id'>>({
+    date: new Date().toISOString().split('T')[0],
+    weightKg: userProfile?.currentWeightKg || 75,
+    bodyFatPct: 20,
+    waistCm: 86,
+    chestCm: 100,
+    bicepCm: 34,
+    thighCm: 58,
+    energyScore: 4,
+    painScore: 1,
+    symptomNotes: '',
+    workoutCompleted: true,
+    dietAdherencePct: 90,
+    waterLitersDrank: 3.5,
+    sleepHours: 7.5,
+    notes: '',
   });
 
-  const pathD = points.length > 1
-    ? points.reduce((acc, curr, idx) => `${acc} ${idx === 0 ? "M" : "L"} ${curr.x} ${curr.y}`, "")
-    : "";
+  const startWeight = progressLogs.length > 0 ? progressLogs[progressLogs.length - 1].weightKg : userProfile?.currentWeightKg || 75;
+  const currentWeight = progressLogs.length > 0 ? progressLogs[0].weightKg : userProfile?.currentWeightKg || 75;
+  const targetWeight = userProfile?.targetWeightKg || 70;
+  const totalChangeKg = currentWeight - startWeight;
+  const isLosingGoal = targetWeight < startWeight;
+
+  // Calculate percentage toward goal
+  const totalDistanceToGoal = Math.abs(startWeight - targetWeight);
+  const achievedDistance = Math.abs(startWeight - currentWeight);
+  const goalProgressPct = totalDistanceToGoal > 0 ? Math.min(100, Math.round((achievedDistance / totalDistanceToGoal) * 100)) : 100;
+
+  const handleSaveLog = (e: React.FormEvent) => {
+    e.preventDefault();
+    addProgressLog(newLog);
+    setIsLogModalOpen(false);
+  };
+
+  // Prepare chart coordinates (chronological order)
+  const chartData = [...progressLogs].reverse();
+  const weights = chartData.map((d) => d.weightKg);
+  const minW = Math.min(...weights, targetWeight) - 1;
+  const maxW = Math.max(...weights, targetWeight) + 1;
+  const range = maxW - minW || 1;
 
   return (
-    <div className="space-y-6">
-      {/* Top Banner KPI Summary */}
-      <div className="bg-gradient-to-br from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 rounded-2xl p-6 shadow-xl">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-5">
+    <div id="progress-view-container" className="space-y-6">
+      {/* Top Banner & Quick Metrics */}
+      <div className="p-6 bg-white border border-slate-200/90 rounded-3xl shadow-xs">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
-                Body Transformation Tracker
-              </span>
-              <span className="text-xs text-slate-400">
-                Goal: <strong className="text-slate-200 capitalize">{profile.goal.replace("_", " ")}</strong>
-              </span>
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-700 text-xs font-bold uppercase tracking-wider mb-2">
+              <Activity className="w-3.5 h-3.5 text-blue-600" />
+              <span>Transformation Analytics & Health Log</span>
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
-              Progress & Body Metrics History
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Initial: <strong className="text-slate-200">{initialEntry.weight} kg</strong> &rarr; Current:{" "}
-              <strong className="text-indigo-400">{latestEntry.weight} kg</strong> &rarr; Target:{" "}
-              <strong className="text-emerald-400">{profile.targetWeight} kg</strong>
+            <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+              Progress & Health Symptom Tracker
+            </h2>
+            <p className="text-xs text-slate-600 mt-1 font-medium">
+              Track weight changes, body measurements, daily energy, and joint recovery status.
             </p>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all"
-            >
-              <Plus className="w-4 h-4" /> Log Today&apos;s Weight
-            </button>
-            <button
-              onClick={onOpenWeeklyCheckInModal}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold shadow-lg shadow-emerald-500/20 flex items-center gap-2 transition-all"
-            >
-              <Sparkles className="w-4 h-4" /> Weekly AI Review
-            </button>
+          <button
+            id="btn-open-log-modal"
+            onClick={() => setIsLogModalOpen(true)}
+            className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-xs shrink-0"
+          >
+            <Plus className="w-4 h-4" /> Log Today&apos;s Progress
+          </button>
+        </div>
+      </div>
+
+      {/* Metric Cards Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+            <span>Current Weight</span>
+            <Scale className="w-4 h-4 text-blue-600" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold font-mono text-slate-900">{currentWeight} kg</div>
+            <div className="text-[11px] text-slate-500 font-medium mt-0.5">
+              Target: <strong className="text-blue-700">{targetWeight} kg</strong>
+            </div>
+          </div>
+          <div className="text-[11px] font-semibold flex items-center gap-1">
+            {totalChangeKg <= 0 ? (
+              <span className="text-emerald-600 flex items-center">
+                <TrendingDown className="w-3 h-3 mr-0.5" /> {Math.abs(totalChangeKg).toFixed(1)} kg dropped
+              </span>
+            ) : (
+              <span className="text-blue-600 flex items-center">
+                <TrendingUp className="w-3 h-3 mr-0.5" /> +{totalChangeKg.toFixed(1)} kg gained
+              </span>
+            )}
           </div>
         </div>
 
-        {/* 4 Metrics Cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-5">
-          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Scale className="w-3.5 h-3.5 text-indigo-400" /> Current Weight
-            </div>
-            <div className="text-2xl font-black text-white mt-1">
-              {latestEntry.weight} <span className="text-xs text-slate-400 font-semibold">kg</span>
-            </div>
-            <div className="text-[11px] flex items-center gap-1 mt-0.5">
-              {totalWeightChange > 0 ? (
-                <span className="text-emerald-400 font-bold flex items-center">
-                  <TrendingUp className="w-3 h-3 mr-0.5" /> +{totalWeightChange.toFixed(1)} kg
-                </span>
-              ) : totalWeightChange < 0 ? (
-                <span className="text-emerald-400 font-bold flex items-center">
-                  <TrendingDown className="w-3 h-3 mr-0.5" /> {totalWeightChange.toFixed(1)} kg
-                </span>
-              ) : (
-                <span className="text-slate-400">0.0 kg change</span>
-              )}
-              <span className="text-slate-500">since start</span>
+        <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+            <span>Goal Achievement</span>
+            <Sparkles className="w-4 h-4 text-amber-500" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold font-mono text-amber-600">{goalProgressPct}%</div>
+            <div className="w-full h-2 bg-slate-100 rounded-full mt-2 overflow-hidden border border-slate-200/60">
+              <div className="h-full bg-amber-500 rounded-full" style={{ width: `${goalProgressPct}%` }} />
             </div>
           </div>
-
-          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Trophy className="w-3.5 h-3.5 text-emerald-400" /> To Target Goal
-            </div>
-            <div className="text-2xl font-black text-emerald-300 mt-1">
-              {weightToTarget.toFixed(1)} <span className="text-xs text-slate-400 font-semibold">kg</span>
-            </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">
-              {isGainGoal ? "to bulk target" : "to cut target"} ({profile.targetWeight} kg)
-            </div>
-          </div>
-
-          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Zap className="w-3.5 h-3.5 text-amber-400" /> Energy & Drive
-            </div>
-            <div className="text-2xl font-black text-amber-300 mt-1 capitalize">
-              {latestEntry.energyLevel || "High"}
-            </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Gym performance score</div>
-          </div>
-
-          <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5">
-            <div className="text-[11px] font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-1.5">
-              <Award className="w-3.5 h-3.5 text-cyan-400" /> Consistency
-            </div>
-            <div className="text-2xl font-black text-cyan-300 mt-1">
-              {latestEntry.adherenceScore || 92}%
-            </div>
-            <div className="text-[11px] text-slate-400 mt-0.5">Diet & workout follow-rate</div>
+          <div className="text-[11px] text-slate-500 font-medium">
+            {Math.abs(currentWeight - targetWeight).toFixed(1)} kg remaining to goal
           </div>
         </div>
 
-        {/* Visual SVG Trend Graph */}
-        <div className="mt-6 pt-5 border-t border-slate-800/80">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5 text-indigo-400" /> Weight Transformation Curve
-            </h3>
-            <span className="text-[11px] text-slate-400">
-              Target Line: <strong className="text-emerald-400">{profile.targetWeight} kg</strong>
+        <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+            <span>Pain & Joint Status</span>
+            <HeartPulse className="w-4 h-4 text-rose-500" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold font-mono text-slate-900 flex items-center gap-2">
+              <span>{progressLogs[0]?.painScore ?? 0}</span>
+              <span className="text-xs text-slate-400 font-normal">/ 5 pain</span>
+            </div>
+            <div className="text-[11px] text-emerald-600 font-bold mt-1">
+              {(progressLogs[0]?.painScore ?? 0) <= 1 ? 'Healthy & Recovering' : 'Managing with Safe Form'}
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-500 font-medium truncate">
+            {userProfile?.healthConditions?.injuries?.join(', ') || 'No active injuries'}
+          </div>
+        </div>
+
+        <div className="p-4 bg-white border border-slate-200 rounded-2xl shadow-2xs flex flex-col justify-between">
+          <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider flex items-center justify-between">
+            <span>Average Energy</span>
+            <Zap className="w-4 h-4 text-teal-600" />
+          </div>
+          <div className="my-2">
+            <div className="text-2xl font-bold font-mono text-teal-700">
+              {progressLogs[0]?.energyScore ?? 4} / 5
+            </div>
+            <div className="text-[11px] text-slate-500 font-medium mt-1">
+              Sleep: {progressLogs[0]?.sleepHours ?? 7.5} hrs/night
+            </div>
+          </div>
+          <div className="text-[11px] text-slate-500 font-medium">Diet Adherence: {progressLogs[0]?.dietAdherencePct ?? 90}%</div>
+        </div>
+      </div>
+
+      {/* Live Community Performance Rating Banner */}
+      <div className="p-5 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 rounded-3xl text-white shadow-md border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-amber-500/20 border border-amber-400/40 flex items-center justify-center text-amber-400 shrink-0 shadow-sm">
+            <Trophy className="w-6 h-6" />
+          </div>
+          <div>
+            <div className="text-[10px] uppercase font-bold text-amber-400 tracking-wider">
+              COMMUNITY PERFORMANCE SCORE
+            </div>
+            <div className="text-base font-extrabold text-white flex items-center gap-2 mt-0.5">
+              <span>{performanceScoreBreakdown.total} / 100 Points</span>
+              <span className="text-xs bg-amber-500/20 text-amber-300 border border-amber-400/30 px-2 py-0.5 rounded-full font-bold">
+                {performanceScoreBreakdown.tierBadge}
+              </span>
+            </div>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Workout ({performanceScoreBreakdown.workoutScore}/35) • Diet ({performanceScoreBreakdown.dietScore}/25) • Consistency ({performanceScoreBreakdown.consistencyScore}/20)
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            id="btn-progress-register"
+            onClick={() => setIsRegistrationModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-all"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-blue-400" />
+            <span>Profile</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Interactive Visual Weight Trend Chart (Clean SVG) */}
+      <div className="p-6 bg-white border border-slate-200/90 rounded-3xl shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-blue-600" />
+            Weight Progression Timeline
+          </h3>
+          <div className="flex items-center gap-3 text-xs font-medium">
+            <span className="flex items-center gap-1.5 text-blue-700">
+              <span className="w-2.5 h-2.5 rounded-full bg-blue-600" /> Logged Weight (kg)
+            </span>
+            <span className="flex items-center gap-1.5 text-amber-700">
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500" /> Target ({targetWeight} kg)
             </span>
           </div>
+        </div>
 
-          <div className="bg-slate-950/90 rounded-2xl p-4 border border-slate-800 overflow-x-auto">
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-44">
-              <defs>
-                <linearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#10b981" />
-                </linearGradient>
-                <linearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" stopOpacity="0.25" />
-                  <stop offset="100%" stopColor="#6366f1" stopOpacity="0.0" />
-                </linearGradient>
-              </defs>
+        {chartData.length > 1 ? (
+          <div className="relative h-56 w-full pt-4">
+            <svg className="w-full h-full overflow-visible" viewBox="0 0 600 180" preserveAspectRatio="none">
+              {/* Grid Background lines */}
+              <line x1="20" y1="20" x2="580" y2="20" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="20" y1="90" x2="580" y2="90" stroke="#f1f5f9" strokeWidth="1" />
+              <line x1="20" y1="160" x2="580" y2="160" stroke="#e2e8f0" strokeWidth="1" />
 
-              {/* Grid lines */}
-              <line x1="20" y1="20" x2={chartWidth - 20} y2="20" stroke="#334155" strokeDasharray="3 3" />
-              <line x1="20" y1={chartHeight / 2} x2={chartWidth - 20} y2={chartHeight / 2} stroke="#334155" strokeDasharray="3 3" />
-              <line x1="20" y1={chartHeight - 20} x2={chartWidth - 20} y2={chartHeight - 20} stroke="#334155" strokeDasharray="3 3" />
-
-              {/* Target Weight horizontal line */}
+              {/* Target Line */}
               {(() => {
-                const targetY = chartHeight - 20 - ((profile.targetWeight - minWeight) / range) * (chartHeight - 40);
+                const targetY = 160 - ((targetWeight - minW) / range) * 140;
                 return (
                   <line
                     x1="20"
                     y1={targetY}
-                    x2={chartWidth - 20}
+                    x2="580"
                     y2={targetY}
-                    stroke="#10b981"
+                    stroke="#f59e0b"
                     strokeWidth="1.5"
                     strokeDasharray="4 4"
+                    opacity="0.8"
                   />
                 );
               })()}
 
-              {/* Path area */}
-              {points.length > 1 && (
-                <path
-                  d={`${pathD} L ${points[points.length - 1].x} ${chartHeight - 20} L ${points[0].x} ${chartHeight - 20} Z`}
-                  fill="url(#areaGrad)"
-                />
-              )}
+              {/* Points & Polyline */}
+              {(() => {
+                const points = chartData.map((d, idx) => {
+                  const x = 30 + (idx / (chartData.length - 1)) * 540;
+                  const y = 160 - ((d.weightKg - minW) / range) * 140;
+                  return `${x},${y}`;
+                });
 
-              {/* Path line */}
-              {points.length > 1 && (
-                <path d={pathD} fill="none" stroke="url(#lineGrad)" strokeWidth="3" strokeLinecap="round" />
-              )}
-
-              {/* Points */}
-              {points.map((p, idx) => (
-                <g key={idx}>
-                  <circle cx={p.x} cy={p.y} r="5" fill="#1e1b4b" stroke="#6366f1" strokeWidth="2.5" />
-                  <text
-                    x={p.x}
-                    y={p.y - 10}
-                    textAnchor="middle"
-                    fill="#f8fafc"
-                    fontSize="10"
-                    fontWeight="bold"
-                  >
-                    {p.entry.weight} kg
-                  </text>
-                  <text
-                    x={p.x}
-                    y={chartHeight - 5}
-                    textAnchor="middle"
-                    fill="#94a3b8"
-                    fontSize="9"
-                  >
-                    {p.entry.date.slice(5)}
-                  </text>
-                </g>
-              ))}
+                return (
+                  <>
+                    <polyline
+                      fill="none"
+                      stroke="#2563eb"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      points={points.join(' ')}
+                    />
+                    {chartData.map((d, idx) => {
+                      const x = 30 + (idx / (chartData.length - 1)) * 540;
+                      const y = 160 - ((d.weightKg - minW) / range) * 140;
+                      return (
+                        <g key={d.id}>
+                          <circle cx={x} cy={y} r="5" fill="#2563eb" stroke="#ffffff" strokeWidth="2" />
+                          <text x={x} y={y - 10} fill="#0f172a" fontSize="11" textAnchor="middle" fontWeight="bold">
+                            {d.weightKg}kg
+                          </text>
+                          <text x={x} y="175" fill="#64748b" fontSize="10" textAnchor="middle" fontWeight="500">
+                            {d.date.slice(5)}
+                          </text>
+                        </g>
+                      );
+                    })}
+                  </>
+                );
+              })()}
             </svg>
           </div>
-        </div>
+        ) : (
+          <div className="p-8 text-center text-xs text-slate-400 font-medium">
+            Log at least 2 progress entries to see your transformation line chart!
+          </div>
+        )}
       </div>
 
-      {/* Body Measurements & Logs Table */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-indigo-400" /> Logged Entries History ({sortedEntries.length})
-          </h3>
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold flex items-center gap-1"
-          >
-            <Plus className="w-3.5 h-3.5" /> New Entry
-          </button>
-        </div>
+      {/* Progress History Log List */}
+      <div className="space-y-3">
+        <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+          <Calendar className="w-4 h-4 text-blue-600" />
+          Logged Entries History
+        </h3>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="border-b border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
-                <th className="py-2.5 px-3">Date</th>
-                <th className="py-2.5 px-3">Weight (kg)</th>
-                <th className="py-2.5 px-3">Chest (cm)</th>
-                <th className="py-2.5 px-3">Biceps / Arms (cm)</th>
-                <th className="py-2.5 px-3">Waist (cm)</th>
-                <th className="py-2.5 px-3">Energy</th>
-                <th className="py-2.5 px-3">Notes</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-800/60 text-slate-300">
-              {sortedEntries.map((entry) => (
-                <tr key={entry.id} className="hover:bg-slate-800/40 transition-colors">
-                  <td className="py-3 px-3 font-semibold text-white whitespace-nowrap">{entry.date}</td>
-                  <td className="py-3 px-3 font-bold text-indigo-300">{entry.weight} kg</td>
-                  <td className="py-3 px-3">{entry.chest ? `${entry.chest} cm` : "—"}</td>
-                  <td className="py-3 px-3">{entry.biceps ? `${entry.biceps} cm` : "—"}</td>
-                  <td className="py-3 px-3">{entry.waist ? `${entry.waist} cm` : "—"}</td>
-                  <td className="py-3 px-3 capitalize">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300">
-                      {entry.energyLevel || "High"}
+        <div className="space-y-3">
+          {progressLogs.map((log) => (
+            <div
+              key={log.id}
+              className="p-4 sm:p-5 bg-white border border-slate-200 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs hover:border-slate-300 transition-colors"
+            >
+              <div className="flex items-start gap-3">
+                <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-center shrink-0">
+                  <div className="text-xs font-bold text-blue-700">{log.date.slice(8)}</div>
+                  <div className="text-[10px] text-slate-400 font-bold uppercase">{log.date.slice(5, 7)}</div>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-base font-bold text-slate-900 font-mono">{log.weightKg} kg</span>
+                    {log.bodyFatPct && (
+                      <span className="text-xs text-slate-500 font-mono">({log.bodyFatPct}% Body Fat)</span>
+                    )}
+                    <span className="text-xs text-blue-700 bg-blue-50 border border-blue-200 px-2 py-0.5 rounded-md font-bold">
+                      Energy {log.energyScore}/5
                     </span>
-                  </td>
-                  <td className="py-3 px-3 text-slate-400 max-w-xs truncate">{entry.notes || "—"}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-md font-bold border ${
+                        log.painScore === 0
+                          ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                          : log.painScore <= 2
+                          ? 'bg-amber-50 border-amber-200 text-amber-800'
+                          : 'bg-rose-50 border-rose-200 text-rose-800'
+                      }`}
+                    >
+                      Pain Score: {log.painScore}/5
+                    </span>
+                  </div>
+
+                  {/* Body tape measurements */}
+                  {(log.waistCm || log.chestCm || log.bicepCm) && (
+                    <div className="flex items-center gap-3 mt-1.5 text-xs text-slate-500 font-medium">
+                      {log.waistCm && <span>Waist: {log.waistCm}cm</span>}
+                      {log.chestCm && <span>Chest: {log.chestCm}cm</span>}
+                      {log.bicepCm && <span>Bicep: {log.bicepCm}cm</span>}
+                      {log.thighCm && <span>Thighs: {log.thighCm}cm</span>}
+                    </div>
+                  )}
+
+                  {log.symptomNotes && (
+                    <p className="text-xs text-amber-900 mt-1.5 bg-amber-50 p-2.5 rounded-xl border border-amber-200 font-medium">
+                      <strong className="text-amber-950">Health & Symptom Note:</strong> {log.symptomNotes}
+                    </p>
+                  )}
+
+                  {log.notes && <p className="text-xs text-slate-600 mt-1 font-medium">{log.notes}</p>}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 self-end sm:self-center">
+                <button
+                  onClick={() => deleteProgressLog(log.id)}
+                  className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors"
+                  title="Delete Log"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Log Entry Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm">
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-white">Log Today&apos;s Progress & Metrics</h3>
-            <form onSubmit={handleSaveEntry} className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Date</label>
-                <input
-                  type="date"
-                  value={newDate}
-                  onChange={(e) => setNewDate(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  required
-                />
+      {/* Log Progress Modal */}
+      {isLogModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="w-full max-w-lg bg-white border border-slate-200 rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                <Plus className="w-4 h-4 text-blue-600" />
+                Log Body Weight & Health Update
+              </h3>
+              <button
+                onClick={() => setIsLogModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 text-xs font-bold"
+              >
+                Cancel
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveLog} className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Date</label>
+                  <input
+                    type="date"
+                    value={newLog.date}
+                    onChange={(e) => setNewLog({ ...newLog, date: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:bg-white focus:border-blue-600 outline-hidden"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Body Weight (kg)</label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={newLog.weightKg}
+                    onChange={(e) => setNewLog({ ...newLog, weightKg: Number(e.target.value) })}
+                    className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-mono font-bold focus:bg-white focus:border-blue-600 outline-hidden"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 gap-2">
+                <div>
+                  <label className="block text-slate-500 text-[11px] font-bold mb-1">Waist (cm)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={newLog.waistCm || ''}
+                    onChange={(e) => setNewLog({ ...newLog, waistCm: Number(e.target.value) })}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-blue-600 outline-hidden"
+                    placeholder="86"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-500 text-[11px] font-bold mb-1">Chest (cm)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={newLog.chestCm || ''}
+                    onChange={(e) => setNewLog({ ...newLog, chestCm: Number(e.target.value) })}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-blue-600 outline-hidden"
+                    placeholder="100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-500 text-[11px] font-bold mb-1">Bicep (cm)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={newLog.bicepCm || ''}
+                    onChange={(e) => setNewLog({ ...newLog, bicepCm: Number(e.target.value) })}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-blue-600 outline-hidden"
+                    placeholder="34"
+                  />
+                </div>
+                <div>
+                  <label className="block text-slate-500 text-[11px] font-bold mb-1">Thighs (cm)</label>
+                  <input
+                    type="number"
+                    step="0.5"
+                    value={newLog.thighCm || ''}
+                    onChange={(e) => setNewLog({ ...newLog, thighCm: Number(e.target.value) })}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-slate-900 text-xs font-medium focus:bg-white focus:border-blue-600 outline-hidden"
+                    placeholder="58"
+                  />
+                </div>
+              </div>
+
+              {/* Energy & Pain Scales */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Energy Score (1 to 5)</label>
+                  <div className="grid grid-cols-5 gap-1">
+                    {[1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setNewLog({ ...newLog, energyScore: num })}
+                        className={`py-1.5 rounded-lg font-bold text-xs border ${
+                          newLog.energyScore === num
+                            ? 'bg-blue-600 border-blue-600 text-white shadow-2xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-700 font-bold mb-1">Joint Pain Score (0 to 5)</label>
+                  <div className="grid grid-cols-6 gap-1">
+                    {[0, 1, 2, 3, 4, 5].map((num) => (
+                      <button
+                        key={num}
+                        type="button"
+                        onClick={() => setNewLog({ ...newLog, painScore: num })}
+                        className={`py-1.5 rounded-lg font-bold text-xs border ${
+                          newLog.painScore === num
+                            ? num === 0
+                              ? 'bg-emerald-600 border-emerald-600 text-white shadow-2xs'
+                              : 'bg-rose-600 border-rose-600 text-white shadow-2xs'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:bg-slate-100'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">
-                  Weight (kg) *
+                <label className="block text-slate-700 font-bold mb-1">
+                  Health & Injury Symptom Details
                 </label>
                 <input
-                  type="number"
-                  step="0.1"
-                  value={newWeight}
-                  onChange={(e) => setNewWeight(Number(e.target.value))}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  required
+                  type="text"
+                  value={newLog.symptomNotes}
+                  onChange={(e) => setNewLog({ ...newLog, symptomNotes: e.target.value })}
+                  placeholder="e.g. Knee pain reduced after doing box squats and hamstrings"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:bg-white focus:border-blue-600 outline-hidden"
                 />
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Chest (cm)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    placeholder="e.g. 98"
-                    value={newChest || ""}
-                    onChange={(e) => setNewChest(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Biceps / Arms (cm)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    placeholder="e.g. 35"
-                    value={newBiceps || ""}
-                    onChange={(e) => setNewBiceps(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Waist (cm)</label>
-                  <input
-                    type="number"
-                    step="0.5"
-                    placeholder="e.g. 81"
-                    value={newWaist || ""}
-                    onChange={(e) => setNewWaist(e.target.value ? Number(e.target.value) : undefined)}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-400 mb-1">Adherence (%)</label>
-                  <input
-                    type="number"
-                    min="10"
-                    max="100"
-                    value={newAdherence}
-                    onChange={(e) => setNewAdherence(Number(e.target.value))}
-                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
-                  />
-                </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1">Notes / Feelings</label>
+                <label className="block text-slate-700 font-bold mb-1">General Notes</label>
                 <textarea
+                  value={newLog.notes}
+                  onChange={(e) => setNewLog({ ...newLog, notes: e.target.value })}
                   rows={2}
-                  placeholder="e.g. Muscle pump was great, felt strong on bench press."
-                  value={newNotes}
-                  onChange={(e) => setNewNotes(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-white"
+                  placeholder="How did you feel about your lifts and meals today?"
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-900 font-medium focus:bg-white focus:border-blue-600 outline-hidden"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white"
-                >
-                  Cancel
-                </button>
+              <div className="pt-2">
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold shadow-lg"
+                  className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors shadow-xs"
                 >
                   Save Progress Entry
                 </button>
