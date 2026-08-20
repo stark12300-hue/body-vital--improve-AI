@@ -259,3 +259,45 @@ export interface ChatMessage {
     action: string;
   }[];
 }
+
+export type CommunityCategory = 
+  | 'workout_form'
+  | 'diet_nutrition'
+  | 'injury_recovery'
+  | 'fat_loss_bulking'
+  | 'supplements'
+  | 'motivation';
+
+export interface CommunityAnswer {
+  id: string;
+  questionId: string;
+  authorId: string;
+  authorName: string;
+  authorRole?: string;
+  authorAvatar?: string;
+  authorTier?: string;
+  text: string;
+  createdAt: string;
+  upvotes: number;
+  upvotedByUser?: boolean;
+  isAcceptedSolution?: boolean;
+}
+
+export interface CommunityQuestion {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorAvatar?: string;
+  authorTier?: string;
+  authorCity?: string;
+  title: string;
+  description: string;
+  category: CommunityCategory;
+  tags: string[];
+  createdAt: string;
+  upvotes: number;
+  upvotedByUser?: boolean;
+  isSolved: boolean;
+  answers: CommunityAnswer[];
+}
+

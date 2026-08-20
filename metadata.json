@@ -1,6 +1,6 @@
 {
   "name": "AI Body Transformation & Fitness Coach",
-  "description": "Personalized AI fitness app with initial body assessment, custom daily workout routines, smart diet charts, health issue tracker, weekly AI progress reviews, and real-time chat support.",
+  "description": "Personalized fitness app with initial body assessment, custom daily workout routines, smart diet charts, health issue tracker, weekly reviews, community leaderboard, and open problem solution & Q&A messaging forum.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -8,6 +8,9 @@ import {
   ChatMessage,
   CommunityMember,
   PerformanceScoreBreakdown,
+  CommunityQuestion,
+  CommunityAnswer,
+  CommunityCategory,
 } from '../types';
 import {
   SAMPLE_PROFILE,
@@ -15,6 +18,7 @@ import {
   SAMPLE_DIET_PLAN,
   INITIAL_PROGRESS_LOGS,
 } from '../data/defaultPlans';
+import { INITIAL_COMMUNITY_QUESTIONS } from '../data/communityDiscussions';
 
 interface FitnessContextType {
   userProfile: UserProfile | null;
@@ -41,6 +45,20 @@ interface FitnessContextType {
   cheerMember: (memberId: string) => Promise<void>;
   registerUserToCommunity: (customProfile: UserProfile) => Promise<boolean>;
   syncUserScoreToCommunity: () => Promise<void>;
+
+  // Community Q&A & Problem Solutions
+  communityQuestions: CommunityQuestion[];
+  addCommunityQuestion: (newQ: {
+    title: string;
+    description: string;
+    category: CommunityCategory;
+    tags: string[];
+  }) => void;
+  addCommunityAnswer: (questionId: string, text: string) => void;
+  upvoteQuestion: (questionId: string) => void;
+  upvoteAnswer: (questionId: string, answerId: string) => void;
+  toggleAcceptSolution: (questionId: string, answerId: string) => void;
+  deleteCommunityQuestion: (questionId: string) => void;
 
   // Actions
   setLanguage: (lang: 'hinglish' | 'english' | 'hindi') => void;
@@ -85,6 +103,7 @@ const STORAGE_KEYS = {
   WATER: 'fitveda_water_ml',
   CHECKLIST: 'fitveda_daily_checklist',
   WEIGHTS: 'fitveda_exercise_weights',
+  COMMUNITY_QUESTIONS: 'fitveda_community_questions',
 };
 
 function calculateUserPerformanceScore(
@@ -290,6 +309,142 @@ Aap mujhse workout form, exercise alternatives, diet recipe swaps ya weekly prog
   const [communityMembers, setCommunityMembers] = useState<CommunityMember[]>([]);
   const [isLoadingCommunity, setIsLoadingCommunity] = useState<boolean>(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState<boolean>(false);
+
+  // Community Q&A / Problem Messages State
+  const [communityQuestions, setCommunityQuestions] = useState<CommunityQuestion[]>(() => {
+    const saved = localStorage.getItem(STORAGE_KEYS.COMMUNITY_QUESTIONS);
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing community questions:', e);
+      }
+    }
+    return INITIAL_COMMUNITY_QUESTIONS;
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.COMMUNITY_QUESTIONS, JSON.stringify(communityQuestions));
+  }, [communityQuestions]);
+
+  const addCommunityQuestion = useCallback((newQ: {
+    title: string;
+    description: string;
+    category: CommunityCategory;
+    tags: string[];
+  }) => {
+    const question: CommunityQuestion = {
+      id: `q-${Date.now()}`,
+      authorId: userProfile?.id || 'user-current',
+      authorName: userProfile?.name || 'Arogya Athlete',
+      authorAvatar: userProfile?.avatarUrl,
+      authorTier: 'Gold Elite',
+      authorCity: userProfile?.city || 'India',
+      title: newQ.title.trim(),
+      description: newQ.description.trim(),
+      category: newQ.category,
+      tags: newQ.tags && newQ.tags.length > 0 ? newQ.tags : ['Fitness', 'Help'],
+      createdAt: 'Just now',
+      upvotes: 1,
+      upvotedByUser: true,
+      isSolved: false,
+      answers: [],
+    };
+    setCommunityQuestions((prev) => [question, ...prev]);
+  }, [userProfile]);
+
+  const addCommunityAnswer = useCallback((questionId: string, text: string) => {
+    if (!text.trim()) return;
+    const answer: CommunityAnswer = {
+      id: `ans-${Date.now()}`,
+      questionId,
+      authorId: userProfile?.id || 'user-current',
+      authorName: userProfile?.name || 'Community Member',
+      authorRole: 'Athlete Member',
+      authorAvatar: userProfile?.avatarUrl,
+      authorTier: 'Gold Elite',
+      text: text.trim(),
+      createdAt: 'Just now',
+      upvotes: 1,
+      upvotedByUser: true,
+      isAcceptedSolution: false,
+    };
+    setCommunityQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            answers: [...q.answers, answer],
+          };
+        }
+        return q;
+      })
+    );
+  }, [userProfile]);
+
+  const upvoteQuestion = useCallback((questionId: string) => {
+    setCommunityQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          const hasUpvoted = q.upvotedByUser;
+          return {
+            ...q,
+            upvotes: hasUpvoted ? Math.max(0, q.upvotes - 1) : q.upvotes + 1,
+            upvotedByUser: !hasUpvoted,
+          };
+        }
+        return q;
+      })
+    );
+  }, []);
+
+  const upvoteAnswer = useCallback((questionId: string, answerId: string) => {
+    setCommunityQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            answers: q.answers.map((a) => {
+              if (a.id === answerId) {
+                const hasUpvoted = a.upvotedByUser;
+                return {
+                  ...a,
+                  upvotes: hasUpvoted ? Math.max(0, a.upvotes - 1) : a.upvotes + 1,
+                  upvotedByUser: !hasUpvoted,
+                };
+              }
+              return a;
+            }),
+          };
+        }
+        return q;
+      })
+    );
+  }, []);
+
+  const toggleAcceptSolution = useCallback((questionId: string, answerId: string) => {
+    setCommunityQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          const isCurrentlyAccepted = q.answers.find((a) => a.id === answerId)?.isAcceptedSolution;
+          const newSolved = !isCurrentlyAccepted;
+          return {
+            ...q,
+            isSolved: newSolved,
+            answers: q.answers.map((a) => ({
+              ...a,
+              isAcceptedSolution: a.id === answerId ? !isCurrentlyAccepted : false,
+            })),
+          };
+        }
+        return q;
+      })
+    );
+  }, []);
+
+  const deleteCommunityQuestion = useCallback((questionId: string) => {
+    setCommunityQuestions((prev) => prev.filter((q) => q.id !== questionId));
+  }, []);
 
   // Calculate live performance score
   const performanceScoreBreakdown = calculateUserPerformanceScore(
@@ -814,6 +969,13 @@ Aap mujhse workout form, exercise alternatives, diet recipe swaps ya weekly prog
         cheerMember,
         registerUserToCommunity,
         syncUserScoreToCommunity,
+        communityQuestions,
+        addCommunityQuestion,
+        addCommunityAnswer,
+        upvoteQuestion,
+        upvoteAnswer,
+        toggleAcceptSolution,
+        deleteCommunityQuestion,
         setLanguage,
         toggleLanguage,
         setSelectedDayNumber,

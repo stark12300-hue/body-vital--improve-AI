@@ -4,7 +4,7 @@ import { AssessmentWizard } from './components/AssessmentWizard';
 import { WorkoutView } from './components/WorkoutView';
 import { DietView } from './components/DietView';
 import { ProgressTrackerView } from './components/ProgressTrackerView';
-import { AICoachChat } from './components/AICoachChat';
+import { CommunityHelpForum } from './components/CommunityHelpForum';
 import { WeeklyReviewModal } from './components/WeeklyReviewModal';
 import { ExerciseAiModal } from './components/ExerciseAiModal';
 import { RestTimer } from './components/RestTimer';
@@ -15,7 +15,7 @@ import {
   Dumbbell, 
   Utensils, 
   TrendingUp, 
-  Bot, 
+  MessageSquare, 
   Sparkles, 
   User, 
   Flame, 
@@ -41,7 +41,7 @@ function FitnessAppContent() {
     setIsRegistrationModalOpen,
   } = useFitness();
 
-  const [activeTab, setActiveTab] = useState<'workout' | 'diet' | 'progress' | 'community' | 'chat'>('workout');
+  const [activeTab, setActiveTab] = useState<'workout' | 'diet' | 'progress' | 'community' | 'help_forum'>('workout');
   const [isAssessmentOpen, setIsAssessmentOpen] = useState<boolean>(false);
   const [isWeeklyReviewOpen, setIsWeeklyReviewOpen] = useState<boolean>(false);
   const [selectedExerciseForAi, setSelectedExerciseForAi] = useState<Exercise | null>(null);
@@ -161,7 +161,7 @@ function FitnessAppContent() {
               { id: 'diet', label: 'Diet & Nutrition', hindi: 'Diet Chart', icon: Utensils },
               { id: 'progress', label: 'Progress Metrics', hindi: 'Progress & Health', icon: TrendingUp },
               { id: 'community', label: 'Community & Leaderboard', hindi: 'Leaderboard & Sabke Scores', icon: Trophy },
-              { id: 'chat', label: 'Ask AI Coach', hindi: 'AI Coach Se Poocho', icon: Bot },
+              { id: 'help_forum', label: 'Community Q&A & Help', hindi: 'Problem & Solutions', icon: MessageSquare },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -278,7 +278,7 @@ function FitnessAppContent() {
 
         {activeTab === 'community' && <CommunityView />}
 
-        {activeTab === 'chat' && <AICoachChat />}
+        {activeTab === 'help_forum' && <CommunityHelpForum />}
       </main>
 
       {/* Floating Rest Timer Widget */}
