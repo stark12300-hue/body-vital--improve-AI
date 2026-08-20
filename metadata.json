@@ -1,0 +1,6 @@
+{
+  "name": "FitForge AI - Workout, Diet & Health Coach",
+  "description": "Bodybuilding & fitness app with tailored workout plans, health-aware diet charts, daily exercise logger, progress tracking, and AI weekly diet updates.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

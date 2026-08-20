@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FitForge AI - Workout, Diet & Health Coach</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <!-- jsPDF for PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-active { border-bottom: 3px solid #f97316; color: #f97316; font-weight: 700; }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen">
+
+  <!-- Header -->
+  <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center text-slate-950 text-xl font-black">
+          <i class="fa-solid fa-dumbbell"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-orange-400 to-amber-200 bg-clip-text text-transparent">FitForge AI</h1>
+          <p class="text-xs text-slate-400">Workout, Nutrition & Health Engine</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button onclick="downloadPDF()" class="px-3 py-2 text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg border border-slate-700 transition flex items-center gap-2">
+          <i class="fa-solid fa-file-pdf text-orange-400"></i> Export Plan
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    
+    <!-- Profile & Goal Form -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8 shadow-xl">
+      <h2 class="text-lg font-bold text-slate-200 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-sliders text-orange-400"></i> Athlete Profile & Goals
+      </h2>
+      
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Age & Gender</label>
+          <div class="flex gap-2">
+            <input type="number" id="age" value="24" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none" placeholder="Age" />
+            <select id="gender" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none">
+              <option value="male">Male</option>
+              <option value="female">Female</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Body Stats (Weight / Height)</label>
+          <div class="flex gap-2">
+            <input type="number" id="weight" value="70" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none" placeholder="kg" />
+            <input type="number" id="height" value="175" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none" placeholder="cm" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Primary Target</label>
+          <select id="goal" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none">
+            <option value="muscle_gain">Hypertrophy (Muscle Gain)</option>
+            <option value="fat_loss">Fat Loss / Cutting</option>
+            <option value="recomp">Body Recomposition</option>
+            <option value="strength">Pure Strength / Powerlifting</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-400 mb-1">Workout Split</label>
+          <select id="split" class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-sm focus:border-orange-500 focus:outline-none">
+            <option value="ppl">Push - Pull - Legs (6-day)</option>
+            <option value="upper_lower">Upper - Lower (4-day)</option>
+            <option value="arnold">Arnold Split (Chest/Back, Shoulders/Arms, Legs)</option>
+            <option value="full_body">Full Body (3-day)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-4 pt-4 border-t border-slate-800 flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-4 text-xs text-slate-400">
+          <span>Diet Preference:</span>
+          <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="dietType" value="non_veg" checked class="accent-orange-500" /> High Protein (Non-Veg/Egg)</label>
+          <label class="flex items-center gap-1 cursor-pointer"><input type="radio" name="dietType" value="veg" class="accent-orange-500" /> Vegetarian + Paneer/Soy</label>
+        </div>
+        <button onclick="calculateAndGenerate()" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-slate-950 font-bold rounded-xl shadow-lg transition flex items-center gap-2">
+          <i class="fa-solid fa-wand-magic-sparkles"></i> Recalculate Plan
+        </button>
+      </div>
+    </div>
+
+    <!-- Macro Metric Ribbon -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+        <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Daily Target</span>
+        <span id="targetCalories" class="text-2xl font-black text-orange-400">2,450</span>
+        <span class="text-xs text-slate-400 ml-1">kcal</span>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+        <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Protein</span>
+        <span id="targetProtein" class="text-2xl font-black text-sky-400">154</span>
+        <span class="text-xs text-slate-400 ml-1">g</span>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+        <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Carbohydrates</span>
+        <span id="targetCarbs" class="text-2xl font-black text-amber-400">275</span>
+        <span class="text-xs text-slate-400 ml-1">g</span>
+      </div>
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl text-center">
+        <span class="text-xs text-slate-400 uppercase tracking-wider block mb-1">Fats</span>
+        <span id="targetFats" class="text-2xl font-black text-rose-400">65</span>
+        <span class="text-xs text-slate-400 ml-1">g</span>
+      </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <div class="flex border-b border-slate-800 mb-6 gap-8 text-sm">
+      <button onclick="switchTab('workout')" id="tabBtn-workout" class="pb-3 tab-active transition">
+        <i class="fa-solid fa-dumbbell mr-1.5"></i> Workout Blueprint
+      </button>
+      <button onclick="switchTab('diet')" id="tabBtn-diet" class="pb-3 text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-utensils mr-1.5"></i> Nutrition & Diet Chart
+      </button>
+      <button onclick="switchTab('ai')" id="tabBtn-ai" class="pb-3 text-slate-400 hover:text-slate-200 transition">
+        <i class="fa-solid fa-robot mr-1.5"></i> AI Fitness Coach
+      </button>
+    </div>
+
+    <!-- TAB 1: WORKOUT -->
+    <div id="tab-workout" class="space-y-6">
+      <div id="workoutContainer" class="grid grid-cols-1 md:grid-cols-3 gap-6"></div>
+    </div>
+
+    <!-- TAB 2: DIET -->
+    <div id="tab-diet" class="hidden space-y-6">
+      <div id="dietContainer" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+    </div>
+
+    <!-- TAB 3: AI COACH -->
+    <div id="tab-ai" class="hidden">
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 max-w-2xl mx-auto shadow-xl">
+        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-slate-800">
+          <div class="w-8 h-8 rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center">
+            <i class="fa-solid fa-brain"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-200">FitForge AI Assistant</h3>
+            <p class="text-xs text-slate-400">Ask any question about exercise form, substitute food, or recovery</p>
+          </div>
+        </div>
+
+        <div id="chatBox" class="h-64 overflow-y-auto space-y-3 p-3 bg-slate-950 rounded-xl border border-slate-800 text-sm mb-4">
+          <div class="bg-slate-900 p-3 rounded-lg border border-slate-800 text-slate-300">
+            👋 Namaste! Main aapka AI Fitness Coach hoon. Workout form, protein intake ya routine ke baare mein kuch bhi poochiye!
+          </div>
+        </div>
+
+        <div class="flex gap-2">
+          <input type="text" id="userInput" placeholder="E.g. Desi diet me 140g protein kaise pura karein?" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm focus:border-orange-500 focus:outline-none" onkeypress="if(event.key==='Enter') sendQuestion()" />
+          <button onclick="sendQuestion()" class="px-5 py-2.5 bg-orange-500 hover:bg-orange-600 text-slate-950 font-bold rounded-xl transition">
+            Send
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script>
+    const workoutsData = {
+      ppl: [
+        {
+          title: "Day 1 & 4: Push (Chest / Delts / Triceps)",
+          exercises: [
+            { name: "Incline Dumbbell Press", sets: "4 sets x 8-10 reps", note: "Upper chest focus, 2 min rest" },
+            { name: "Flat Barbell Bench Press", sets: "3 sets x 6-8 reps", note: "Progressive overload" },
+            { name: "Standing Dumbbell Lateral Raise", sets: "4 sets x 12-15 reps", note: "Side delts width" },
+            { name: "Cable Overhead Tricep Extension", sets: "3 sets x 12 reps", note: "Long head tricep stretch" }
+          ]
+        },
+        {
+          title: "Day 2 & 5: Pull (Back / Rear Delts / Biceps)",
+          exercises: [
+            { name: "Lat Pulldowns (Neutral Grip)", sets: "4 sets x 8-10 reps", note: "Full vertical stretch" },
+            { name: "Chest Supported T-Bar Row", sets: "4 sets x 10 reps", note: "Mid back thickness" },
+            { name: "Face Pulls with Rope", sets: "3 sets x 15 reps", note: "Rear delt and rotator cuff health" },
+            { name: "Incline Dumbbell Bicep Curls", sets: "3 sets x 10-12 reps", note: "Deep bicep stretch" }
+          ]
+        },
+        {
+          title: "Day 3 & 6: Legs (Quads / Hamstrings / Calves)",
+          exercises: [
+            { name: "Barbell Back Squats / Hack Squats", sets: "4 sets x 6-8 reps", note: "Quad overload" },
+            { name: "Romanian Deadlifts (Dumbbells)", sets: "3 sets x 8-10 reps", note: "Hamstring hinge" },
+            { name: "Leg Extensions", sets: "3 sets x 12-15 reps", note: "Peak quad contraction" },
+            { name: "Standing Calf Raises", sets: "4 sets x 15 reps", note: "Full stretch at bottom" }
+          ]
+        }
+      ]
+    };
+
+    const dietData = {
+      non_veg: [
+        { meal: "Meal 1: Breakfast (Post-Wakeup)", items: "4 Whole Boiled Eggs + 2 slices 100% Whole Wheat Toast + 1 Banana", protein: "28g Protein" },
+        { meal: "Meal 2: Lunch (Midday Fuel)", items: "150g Grilled/Cooked Chicken Breast (or Fish) + 1 cup Brown/White Rice + Green Salad", protein: "45g Protein" },
+        { meal: "Meal 3: Pre-Workout Snack", items: "1 scoop Whey Protein in water + 1 Apple or Oats with Peanut Butter", protein: "27g Protein" },
+        { meal: "Meal 4: Dinner (Recovery)", items: "150g Paneer or 4 Boiled Eggs Bhurji + 2 Chapatis + Mixed Dal / Curd", protein: "35g Protein" }
+      ],
+      veg: [
+        { meal: "Meal 1: High-Protein Breakfast", items: "100g Paneer stir-fry + 2 Besan Chillas + 1 glass Warm Milk / Soya Milk", protein: "32g Protein" },
+        { meal: "Meal 2: Balanced Lunch", items: "1.5 cup Thick Rajma/Chole + 1 cup Rice + 1 bowl Fresh Curd (Dahi) + Salad", protein: "28g Protein" },
+        { meal: "Meal 3: Evening Snack", items: "50g Roasted Peanuts/Chana + 1 scoop Plant/Whey Protein isolate", protein: "30g Protein" },
+        { meal: "Meal 4: Dinner", items: "100g Soya Chunks Curry + 2 Whole Wheat Rotis + Spinach/Green Sabzi", protein: "42g Protein" }
+      ]
+    };
+
+    function calculateAndGenerate() {
+      const weight = parseFloat(document.getElementById('weight').value) || 70;
+      const goal = document.getElementById('goal').value;
+      const dietType = document.querySelector('input[name="dietType"]:checked').value;
+
+      let cals = weight * 33;
+      let protein = weight * 2.0; // 2g per kg
+
+      if (goal === 'fat_loss') cals -= 400;
+      if (goal === 'muscle_gain') cals += 300;
+
+      const fats = Math.round((cals * 0.25) / 9);
+      const carbs = Math.round((cals - (protein * 4) - (fats * 9)) / 4);
+
+      document.getElementById('targetCalories').innerText = Math.round(cals).toLocaleString();
+      document.getElementById('targetProtein').innerText = Math.round(protein);
+      document.getElementById('targetCarbs').innerText = Math.round(carbs);
+      document.getElementById('targetFats').innerText = Math.round(fats);
+
+      renderWorkout();
+      renderDiet(dietType);
+    }
+
+    function renderWorkout() {
+      const container = document.getElementById('workoutContainer');
+      const list = workoutsData.ppl;
+      container.innerHTML = list.map(day => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg">
+          <h3 class="text-sm font-bold text-orange-400 border-b border-slate-800 pb-3 mb-3 flex items-center justify-between">
+            <span>${day.title}</span>
+          </h3>
+          <div class="space-y-3">
+            ${day.exercises.map(ex => `
+              <div class="bg-slate-950 p-3 rounded-xl border border-slate-800/80">
+                <div class="text-sm font-semibold text-slate-200">${ex.name}</div>
+                <div class="text-xs text-orange-300/90 font-mono mt-0.5">${ex.sets}</div>
+                <div class="text-[11px] text-slate-400 mt-1"><i class="fa-solid fa-circle-info text-[10px] text-slate-500 mr-1"></i>${ex.note}</div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderDiet(type) {
+      const container = document.getElementById('dietContainer');
+      const meals = dietData[type] || dietData.non_veg;
+      container.innerHTML = meals.map(m => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-lg flex flex-col justify-between">
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h4 class="font-bold text-sm text-slate-200">${m.meal}</h4>
+              <span class="text-xs bg-orange-500/20 text-orange-400 font-bold px-2 py-0.5 rounded-full border border-orange-500/30">${m.protein}</span>
+            </div>
+            <p class="text-xs text-slate-300 leading-relaxed">${m.items}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function switchTab(tab) {
+      ['workout', 'diet', 'ai'].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.add('hidden');
+        document.getElementById(`tabBtn-${t}`).className = 'pb-3 text-slate-400 hover:text-slate-200 transition';
+      });
+      document.getElementById(`tab-${tab}`).classList.remove('hidden');
+      document.getElementById(`tabBtn-${tab}`).className = 'pb-3 tab-active transition';
+    }
+
+    function sendQuestion() {
+      const input = document.getElementById('userInput');
+      const query = input.value.trim();
+      if (!query) return;
+
+      const chat = document.getElementById('chatBox');
+      chat.innerHTML += `<div class="bg-orange-500/10 border border-orange-500/20 p-3 rounded-lg text-orange-200 text-right"><b>Aap:</b> ${query}</div>`;
+      input.value = '';
+      chat.scrollTop = chat.scrollHeight;
+
+      setTimeout(() => {
+        let answer = "Great question! Hypertrophy ke liye progressive overload (har hafte 1 extra rep ya thoda weight add karna) aur rojana body weight x 1.8g protein intake sabse crucial hota hai. Form ko clean rakhein!";
+        if (query.toLowerCase().includes('protein')) {
+          answer = "Vegetarian me Paneer, Soya chunks, Dahi, Besan chilla aur Whey isolate se 120g+ protein aram se reach ho sakta hai!";
+        }
+        chat.innerHTML += `<div class="bg-slate-900 border border-slate-800 p-3 rounded-lg text-slate-300"><b>Coach:</b> ${answer}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+      }, 400);
+    }
+
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.text("FitForge AI - Custom Fitness & Diet Blueprint", 15, 20);
+      doc.text(`Daily Calorie Goal: ${document.getElementById('targetCalories').innerText} kcal`, 15, 35);
+      doc.text(`Protein Target: ${document.getElementById('targetProtein').innerText} g`, 15, 45);
+      doc.text(`Carbs Target: ${document.getElementById('targetCarbs').innerText} g | Fats: ${document.getElementById('targetFats').innerText} g`, 15, 55);
+      doc.text("Plan generated successfully. Keep consistency and maintain progressive overload!", 15, 75);
+      doc.save("FitForge_Workout_Diet_Plan.pdf");
+    }
+
+    // Auto initialize
+    calculateAndGenerate();
+  </script>
+</body>
+</html>
