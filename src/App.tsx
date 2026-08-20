@@ -161,7 +161,7 @@ function FitnessAppContent() {
               { id: 'diet', label: 'Diet & Nutrition', hindi: 'Diet Chart', icon: Utensils },
               { id: 'progress', label: 'Progress Metrics', hindi: 'Progress & Health', icon: TrendingUp },
               { id: 'community', label: 'Community & Leaderboard', hindi: 'Leaderboard & Sabke Scores', icon: Trophy },
-              { id: 'chat', label: 'AI Health Assistant', hindi: 'AI Coach Chat', icon: Bot },
+              { id: 'chat', label: 'Ask AI Coach', hindi: 'AI Coach Se Poocho', icon: Bot },
             ].map((tab) => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;

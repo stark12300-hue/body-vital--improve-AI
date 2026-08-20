@@ -16,11 +16,12 @@ import {
 } from 'lucide-react';
 
 export const AICoachChat: React.FC = () => {
-  const { chatMessages, sendChatMessage, userProfile, dietPlan, workoutPlan } = useFitness();
+  const { chatMessages, sendChatMessage, userProfile, dietPlan } = useFitness();
   const [inputText, setInputText] = useState<string>('');
   const [isSending, setIsSending] = useState<boolean>(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,9 +31,15 @@ export const AICoachChat: React.FC = () => {
     scrollToBottom();
   }, [chatMessages, isSending]);
 
-  const handleSend = async (textToSend?: string) => {
-    const text = textToSend || inputText;
-    if (!text.trim() || isSending) return;
+  useEffect(() => {
+    // Focus input on load for instant direct typing
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSend = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const text = inputText.trim();
+    if (!text || isSending) return;
 
     setInputText('');
     setIsSending(true);
@@ -40,6 +47,7 @@ export const AICoachChat: React.FC = () => {
       await sendChatMessage(text);
     } finally {
       setIsSending(false);
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
   };
 
@@ -48,14 +56,6 @@ export const AICoachChat: React.FC = () => {
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
-
-  const quickPrompts = [
-    { label: '🦵 Knee / Joint Pain Safe Swap', text: 'Ghutne me halka dard hai, squats aur lunges ka safe replacement batao' },
-    { label: '🥗 High-Protein Veg Snacks under ₹50', text: 'Vegetarian high protein snacks batao jo saste aur 20g+ protein wale hon' },
-    { label: '💪 Chest Hypertrophy & Upper Pecs', text: 'Upper chest grow karne ke liye best exercise aur rep range kya hai?' },
-    { label: '🕒 Pre vs Post Workout Nutrition', text: 'Gym se pehle aur gym ke turant baad kya khana sabse best hai?' },
-    { label: '⚡ Energy & Craving Control', text: 'Afternoon me sugar craving aur gym me low energy ko kaise theek karein?' },
-  ];
 
   return (
     <div id="ai-chat-view-container" className="space-y-6">
@@ -69,12 +69,12 @@ export const AICoachChat: React.FC = () => {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
-                  FitGuru AI Coach (Arogya Support)
+                  FitGuru AI Coach
                 </h2>
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
               </div>
               <p className="text-xs text-slate-600 mt-0.5 font-medium">
-                24/7 Personal Trainer & Sports Nutritionist • Natural Hinglish & English Support
+                Direct Q&A • Apna koi bhi fitness, diet, exercises ya supplements ka sawal seedhe poochiye
               </p>
             </div>
           </div>
@@ -91,23 +91,7 @@ export const AICoachChat: React.FC = () => {
       </div>
 
       {/* Chat Container */}
-      <div className="bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-xs flex flex-col h-[580px]">
-        {/* Quick Suggestion Chips */}
-        <div className="p-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 overflow-x-auto no-scrollbar">
-          <span className="text-[11px] font-bold text-slate-500 flex items-center gap-1 shrink-0 pl-1">
-            <Lightbulb className="w-3.5 h-3.5 text-amber-500" /> Quick Questions:
-          </span>
-          {quickPrompts.map((q, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleSend(q.text)}
-              className="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 hover:border-blue-300 text-slate-700 hover:text-slate-900 text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1 shrink-0 shadow-2xs"
-            >
-              <span>{q.label}</span>
-            </button>
-          ))}
-        </div>
-
+      <div className="bg-white border border-slate-200/90 rounded-3xl overflow-hidden shadow-xs flex flex-col h-[600px]">
         {/* Messages Stream */}
         <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 bg-slate-50/40">
           {chatMessages.map((msg) => {
@@ -186,27 +170,26 @@ export const AICoachChat: React.FC = () => {
 
         {/* Input Bar */}
         <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSend();
-          }}
+          onSubmit={handleSend}
           className="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-center gap-2"
         >
           <input
+            ref={inputRef}
             type="text"
             id="input-ai-chat"
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Poochiye — diet recipe swap, workout form, injury protection..."
-            className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors font-medium"
+            placeholder="Apna sawal yahan type karein (e.g. Chest workout, Diet tips, Creatine, Knee pain)..."
+            className="flex-1 px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white transition-colors font-medium"
           />
 
           <button
             id="btn-send-chat"
             type="submit"
             disabled={!inputText.trim() || isSending}
-            className="p-3 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-colors disabled:opacity-40 shrink-0 shadow-xs"
+            className="px-5 py-3.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl font-bold transition-colors disabled:opacity-40 shrink-0 shadow-xs flex items-center gap-2 text-xs"
           >
+            <span>Send</span>
             <Send className="w-4 h-4" />
           </button>
         </form>
